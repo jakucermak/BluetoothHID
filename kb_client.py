@@ -1,6 +1,10 @@
 import dbus
 import evdev
+from evdev import InputDevice
 import keymap
+
+from sshkeyboard import listen_keyboard
+
 from time import sleep
 
 HID_DBUS = 'org.yaptb.btkbservice'
@@ -12,6 +16,7 @@ class Kbrd:
     Take the events from a physically attached keyboard and send the
     HID messages to the keyboard D-Bus server.
     """
+
     def __init__(self):
         self.target_length = 6
         self.mod_keys = 0b00000000
@@ -32,17 +37,20 @@ class Kbrd:
         /dev/input/event
         :param event_id: Optional parameter if the keyboard is not event0
         """
-        while not self.have_kb:
+        
+        while self.have_kb is False:
             try:
-                # try and get a keyboard - should always be event0 as
-                # we're only plugging one thing in
-                self.dev = evdev.InputDevice('/dev/input/event{}'.format(
-                    event_id))
-                self.have_kb = True
+                devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
+                for device in reversed(devices):
+                    if "keyboard" in device.name.lower():
+                        print("Found a keyboard with the keyword 'keyboard'")
+                        print("device name is " + device.name)
+                        self.dev = InputDevice(device.path)
+                        self.have_kb = True
+                        break
             except OSError:
                 print('Keyboard not found, waiting 3 seconds and retrying')
                 sleep(3)
-            print('found a keyboard')
 
     def update_mod_keys(self, mod_key, value):
         """
@@ -53,9 +61,9 @@ class Kbrd:
         :param value: Binary 1 or 0 depending if pressed or released
         """
         bit_mask = 1 << (7-mod_key)
-        if value: # set bit
+        if value:  # set bit
             self.mod_keys |= bit_mask
-        else: # clear bit
+        else:  # clear bit
             self.mod_keys &= ~bit_mask
 
     def update_keys(self, norm_key, value):
@@ -88,6 +96,7 @@ class Kbrd:
         """
         print('Listening...')
         for event in self.dev.read_loop():
+
             # only bother if we hit a key and its an up or down event
             if event.type == evdev.ecodes.EV_KEY and event.value < 2:
                 key_str = evdev.ecodes.KEY[event.code]
@@ -97,6 +106,17 @@ class Kbrd:
                 else:
                     self.update_keys(keymap.convert(key_str), event.value)
             self.send_keys()
+
+    def onPress(self, key):
+        self.update_keys(keymap.convert(f"KEY_{key.upper()}"), 1)
+        self.send_keys()
+
+    def onRelease(self, key):
+        self.update_keys(keymap.convert(f"KEY_{key.upper()}"), 0)
+        self.send_keys()
+
+    def event_loop_term(self):
+        listen_keyboard(on_press=self.onPress, on_release=self.onRelease)
 
 
 if __name__ == '__main__':

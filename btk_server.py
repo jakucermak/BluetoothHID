@@ -17,6 +17,7 @@ import socket
 from gi.repository import GLib
 from dbus.mainloop.glib import DBusGMainLoop
 
+import xml.etree.ElementTree as ET
 
 class HumanInterfaceDeviceProfile(dbus.service.Object):
     """
@@ -290,11 +291,40 @@ class BTKbService(dbus.service.Object):
 
         # start listening for socket connections
         self.device.listen()
-
+    
     @dbus.service.method('org.yaptb.btkbservice',
-                         in_signature='ay')
-    def send_keys(self, cmd):
-        self.device.send(cmd)
+                        in_signature='ay')
+    def send_keys(self, keys):
+        print(keys)
+        self.device.send(keys)
+    
+    # @dbus.service.method('org.yaptb.btkbservice', in_signature='yay')
+    # def send_keys(self, modifier_byte, keys):
+    #      print("Received Keyboard Input, sending it via Bluetooth")
+    #      cmd_str = ""
+    #      cmd_str += chr(0xA1)
+    #      cmd_str += chr(0x01)
+    #      cmd_str += chr(modifier_byte)
+    #      cmd_str += chr(0x00)
+
+    #      count = 0
+    #      for key_code in keys:
+    #          if count < 6:
+    #              cmd_str += chr(key_code)
+    #          count += 1
+    #      self.device.send(cmd_str)
+    
+    
+    @dbus.service.method('org.yaptb.btkbservice',in_signature='ai')
+    def send_mouse(self, state):
+        print("Received Mouse Input, sending it via Bluetooth")
+        
+        print(state)
+        self.device.send(state)
+        
+    @dbus.service.method('org.freedesktop.DBus.Introspectable', out_signature='s')
+    def Introspect(self):
+          return ET.tostring(ET.parse(os.getcwd()+'/org.yaptb.hidbluetooth.introspection').getroot(), encoding='utf8', method='xml')
 
 
 if __name__ == '__main__':

@@ -1,5 +1,5 @@
 #
-# www.linuxuser.co.uk/tutorials/emulate-a-bluetooth-keyboard-with-the-raspberry-pi
+#
 #
 #
 #
