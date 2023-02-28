@@ -253,7 +253,9 @@ class BTKbDevice:
         Send HID message
         :param msg: (bytes) HID packet to send
         """
-        self.cinterrupt.send(bytes(bytearray(msg)))
+        print(msg)
+        print(self.cinterrupt.send(bytes(bytearray(msg))))
+        
 
     def reconnect(self, hidHost):
         print("Trying reconnect...")
@@ -295,31 +297,13 @@ class BTKbService(dbus.service.Object):
     @dbus.service.method('org.yaptb.btkbservice',
                         in_signature='ay')
     def send_keys(self, keys):
-        print(keys)
         self.device.send(keys)
-    
-    # @dbus.service.method('org.yaptb.btkbservice', in_signature='yay')
-    # def send_keys(self, modifier_byte, keys):
-    #      print("Received Keyboard Input, sending it via Bluetooth")
-    #      cmd_str = ""
-    #      cmd_str += chr(0xA1)
-    #      cmd_str += chr(0x01)
-    #      cmd_str += chr(modifier_byte)
-    #      cmd_str += chr(0x00)
-
-    #      count = 0
-    #      for key_code in keys:
-    #          if count < 6:
-    #              cmd_str += chr(key_code)
-    #          count += 1
-    #      self.device.send(cmd_str)
     
     
     @dbus.service.method('org.yaptb.btkbservice',in_signature='ai')
     def send_mouse(self, state):
         print("Received Mouse Input, sending it via Bluetooth")
         
-        print(state)
         self.device.send(state)
         
     @dbus.service.method('org.freedesktop.DBus.Introspectable', out_signature='s')

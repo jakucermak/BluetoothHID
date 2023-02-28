@@ -14,10 +14,11 @@
             "justMyCode": true
         },
         {
-            "name": "Keyboard client",
+            "name": "Mouse client",
             "type": "python",
             "request": "launch",
-            "program": "kb_client.py",
+            "program": "mouse_client.py",
+            "args": ["--dev", "simulate", "-x", "10", "-y", "10"],
             "console": "integratedTerminal"
         }
     ]

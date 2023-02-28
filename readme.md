@@ -1,4 +1,4 @@
-This was an experiment to turn a Raspberry Pi into a Human Interface Device (HID). A keyboard to be more precise.
+This was an experiment to turn a Raspberry Pi into a Human Interface Device (HID).
 
 I followed the instructions at the following location to get me started:
 http://yetanotherpointlesstechblog.blogspot.com/2016/04/emulating-bluetooth-keyboard-with.html
@@ -93,7 +93,7 @@ Configuring Bluez Profile
 Reading service record
 Profile registered
 Waiting for connections
- ```
+```
 Scan for the keyboard Pi and connect from main computer
 ```
 8C:2D:AA:44:0E:3A connected on the control socket

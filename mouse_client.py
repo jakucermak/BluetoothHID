@@ -4,6 +4,7 @@ import dbus.mainloop.glib
 import time
 import evdev  # used to get input from the mouse
 from evdev import InputDevice, ecodes
+import argparse
 
 
 HID_DBUS = 'org.yaptb.btkbservice'
@@ -13,9 +14,8 @@ HID_SRVC = '/org/yaptb/btkbservice'
 # define a client to listen to local mouse events
 class Mouse:
 
-    def __init__(self):
+    def __init__(self, mode: str):
         # the structure for a bluetooth mouse input report (size is 6 bytes)
-
 
         print("Setting up DBus Client")
 
@@ -29,42 +29,40 @@ class Mouse:
         have_dev = False
         count = 0
         NUMBER_OF_TRIES = 100
+        
+        if mode == "mouse":
+            while have_dev is False and count < NUMBER_OF_TRIES:
+                try:
+                    # try and get a mouse - loop through all devices and try to find a mouse
+                    devices = [evdev.InputDevice(fn)
+                            for fn in evdev.list_devices()]
+                    for device in reversed(devices):
+                        if "mouse" in device.name.lower():
+                            print("Found a mouse with the keyword 'mouse'")
+                            print("device name is " + device.name)
+                            self.dev = InputDevice(device.path)
+                            have_dev = True
+                            break
+                except OSError:
+                    print("Mouse not found, waiting 3 seconds and retrying")
+                    time.sleep(3)
+                count += 1
 
-        while have_dev is False and count < NUMBER_OF_TRIES:
-            try:
-                # try and get a mouse - loop through all devices and try to find a mouse
-                devices = [evdev.InputDevice(fn)
-                           for fn in evdev.list_devices()]
-                for device in reversed(devices):
-                    if "mouse" in device.name.lower():
-                        print("Found a keyboard with the keyword 'mouse'")
-                        print("device name is " + device.name)
-                        self.dev = InputDevice(device.path)
-                        have_dev = True
-                        break
-            except OSError:
-                print("Mouse not found, waiting 3 seconds and retrying")
-                time.sleep(3)
-            count += 1
+            if not have_dev:
+                print("Mouse not found after " + str(NUMBER_OF_TRIES) + " tries.")
+                return
+            else:
+                print("Mouse Found")
 
-        if not have_dev:
-            print("Mouse not found after " + str(NUMBER_OF_TRIES) + " tries.")
-            return
-        else:
-            print("Mouse Found")
-            print("Starting mouse event loop")
-            self.event_loop()
-            
-    
     state = [
-            0xA1,  # this is an input report
-            0x02,  # Usage report = Mouse
-            # Bit array for Buttons ( Bits 0...4 : Buttons 1...5, Bits 5...7 : Unused )
-            0x00,
-            0x00,  # Rel X
-            0x00,  # Rel Y
-            0x00,  # Mouse Wheel
-        ]
+        0xA1,  # this is an input report
+        0x02,  # Usage report = Mouse
+        # Bit array for Buttons ( Bits 0...4 : Buttons 1...5, Bits 5...7 : Unused )
+        0x00,
+        0x00,  # Rel X
+        0x00,  # Rel Y
+        0x00,  # Mouse Wheel
+    ]
 
     # take care of mouse buttons
     def change_state_button(self, event):
@@ -90,7 +88,6 @@ class Mouse:
         elif event.code == ecodes.REL_WHEEL:
             self.state[5] = event.value & 0xFF
 
-
     # poll for mouse events
     def event_loop(self):
         for event in self.dev.read_loop():
@@ -103,12 +100,39 @@ class Mouse:
             except Exception:
                 print("Couldn't send mouse input")
 
+    def simulate_move(self, relX, relY):
+        self.state[3] = relX
+        self.state[4] = relY
+
+        try:
+            self.send_input()
+        except Exception:
+            print("Could not send mouse input.")
+
     # forward mouse events to the dbus service
 
     def send_input(self):
         self.iface.send_mouse(self.state)
 
 
+
+parser = argparse.ArgumentParser(
+    description="Add relative mouse move integers")
+parser.add_argument('--dev', default="mouse", type=str)
+parser.add_argument('-x', default=0, type=int)
+parser.add_argument('-y', default=0, type=int)
+
+
 if __name__ == "__main__":
-    print("Setting up mouse")
-    Mouse()
+    print("Setting up mouse Client")
+    
+    args = parser.parse_args()
+    if "mouse" == args.dev:
+        mouse = Mouse("mouse")
+        print("Starting mouse event loop")
+        mouse.event_loop()
+    elif "simulate" == args.dev:
+        mouse = Mouse("simulate")
+        print("Simulating mouse movement")
+        mouse.simulate_move(args.x,args.y)
+    
