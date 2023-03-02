@@ -52,7 +52,7 @@ ExecStart=/usr/lib/bluetooth/bluetoothd -P input
 ## Configure D-Bus
 When a new service is created on the D-Bus, this service needs to be configured.
 ```
-sudo cp org.yaptb.btkkbservice.conf /etc/dbus-1/system.d
+sudo cp org.yaptb.btkbservice.conf /etc/dbus-1/system.d
 ```
 
 ## Event loop
