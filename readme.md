@@ -1,4 +1,4 @@
-This was an experiment to turn a Raspberry Pi into a Human Interface Device (HID).
+was an experiment to turn a Raspberry Pi into a Human Interface Device (HID).
 
 I followed the instructions at the following location to get me started:
 http://yetanotherpointlesstechblog.blogspot.com/2016/04/emulating-bluetooth-keyboard-with.html
