@@ -110,4 +110,6 @@ Listening...
 ```
 
 TODO
+
 * Unify file and service names (as mentioned at the begining of mouse client and keyboard client)
+* Fix: OSError: [Errno 98] Address already in use #1
