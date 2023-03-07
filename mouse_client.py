@@ -104,41 +104,27 @@ class Mouse:
 
     # silmulate mouse movement using relative cooridinates
     def simulate_move(self, relX, relY):
-        while relX != 0 or relY != 0:
-            if relX > 0:
-                self.state[3] = 1
-                relX -= 1
-            if relX < 0:
-                self.state[3] = 255
-                relX += 1
-            
-            if relY > 0:
-                self.state[4] = 1
-                relY -= 1
-            if relY < 0:
-                self.state[4]= 255
-                relY += 1
 
-            try:
-                time.sleep(self.t)
-                self.send_input()
-                self.state[3] = 0
-                self.state[4] = 0
-            except Exception:
-                print("Could not send mouse input.")
-                break
+        self.state[3] = relX
+        self.state[4] = relY
 
+        try:
+            time.sleep(self.t)
+            self.send_input()
+            self.state[3] = 0
+            self.state[4] = 0
+        except Exception as e:
+            print(e)
     # forward mouse events to the dbus service
+
     def send_input(self):
         self.iface.send_mouse(self.state)
 
 
 parser = argparse.ArgumentParser(
     description="Creates mouse client for control device(computer, phone,..) connected over BT over mouse or simulate movement")
-parser.add_argument('--dev', default="mouse", type=str,choices=["mouse", "simulate"], help="set if you want to simulate mouse or use real device")
-parser.add_argument('-x', default=0, type=int, help="Simulator only. Relative x position accepts positive and negative integers. Default is 0")
-parser.add_argument('-y', default=0, type=int, help="Simulator only. Relative y position accepts positive and negative integers. Default is 0")
-parser.add_argument('-t', default=0.05,type=float, help="Simulator only. Time in seconds. Acctepts Float. Higher number means \"pause\" between each steps is longer")
+parser.add_argument('--dev', default="mouse", type=str, choices=[
+                    "mouse", "simulate"], help="set if you want to simulate mouse or use real device")
 
 if __name__ == "__main__":
     print("Setting up mouse Client")
@@ -151,4 +137,4 @@ if __name__ == "__main__":
     elif "simulate" == args.dev:
         mouse = Mouse("simulate", args.t)
         print("Simulating mouse movement")
-        mouse.simulate_move(args.x, args.y)
+

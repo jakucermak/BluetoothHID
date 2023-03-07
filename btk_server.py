@@ -57,7 +57,7 @@ class BTKbDevice:
     """
     create a bluetooth device to emulate a HID keyboard
     """
-    MY_DEV_NAME = 'BT_HID_Keyboard'
+    MY_DEV_NAME = 'BT_HID'
     # Service port - must match port configured in SDP record
     P_CTRL = 17
     # Service port - must match port configured in SDP record#Interrrupt port
@@ -247,7 +247,7 @@ class BTKbDevice:
 
         self.cinterrupt, cinfo = self.sinterrupt.accept()
         print('{} connected on the interrupt channel'.format(cinfo[0]))
-
+        
     def send(self, msg):
         """
         Send HID message
@@ -255,7 +255,7 @@ class BTKbDevice:
         """
         print(msg)
         print(self.cinterrupt.send(bytes(bytearray(msg))))
-        
+
 
     def reconnect(self, hidHost):
         print("Trying reconnect...")
