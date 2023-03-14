@@ -22,7 +22,7 @@ sudo apt-get dist-upgrade
 Check that the packages required for this are installed
 ```
 sudo apt-get install python3-dbus
-sudo pip install evdev
+sudo pip install -r requirements.txt
 ```
 
 Here is an outline of things I changed:

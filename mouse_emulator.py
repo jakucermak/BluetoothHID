@@ -4,7 +4,7 @@ import argparse
 
 class MouseEmulator:
 
-    def __init__(self, t = 0.05):
+    def __init__(self, t = 0.00):
 
         self.mouse = Mouse("simulate", t)
 
@@ -30,7 +30,7 @@ class MouseEmulator:
 
             step_x = step_y =  0
 
-    def send_mouse_emulator(self, rel_x, rel_y):
+    def send_mouse_events(self, rel_x, rel_y):
         try:
             self.mouse.simulate_move(rel_x, rel_y)
         except Exception as e:
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     try:
-        mouse_emu = MouseEmulator()
+        mouse_emu = MouseEmulator(args.t)
         mouse_emu.emulate_mouse_movement(args.x, args.y)
     except Exception as e:
         print(e)
