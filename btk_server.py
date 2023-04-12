@@ -69,7 +69,7 @@ class BTKbDevice:
     DBUS_PROP_IFACE = 'org.freedesktop.DBus.Properties'
     DBUS_OM_IFACE = 'org.freedesktop.DBus.ObjectManager'
 
-    # file path of the sdp record to laod
+    # file path of the sdp record to load
     install_dir = os.path.dirname(os.path.realpath(__file__))
     SDP_RECORD_PATH = os.path.join(install_dir,
                                    'sdp_record.xml')
@@ -116,7 +116,7 @@ class BTKbDevice:
 
         # set the Bluetooth device configuration
         self.alias = BTKbDevice.MY_DEV_NAME
-        self.discoverabletimeout = 0
+        self.discoverable_timeout = 0
         self.discoverable = True
 
     def interfaces_added(self, path, device_info):
@@ -126,7 +126,7 @@ class BTKbDevice:
         """
     The _properties_changed function is a callback function that gets called whenever the
     properties of an object change. In this case, we are interested in the Connected property
-    of our device. If it changes to False, then we know that our device has disconnected and
+    of our device. If it changes to False, then we know that our device has disconnected, and
     we can call on_disconnect().
 
     :param self: Access the object itself, and is used to call other functions within the class
@@ -218,9 +218,9 @@ class BTKbDevice:
         self.adapter_property.Set(self.ADAPTER_IFACE, 'Alias', new_alias)
 
     @property
-    def discoverabletimeout(self):
+    def discoverable_timeout(self):
         """
-    The discoverabletimeout function returns the timeout value of the adapter.
+    The discoverable timeout function returns the timeout value of the adapter.
 
     :param self: Represent the instance of the class
     :return: The timeout value in seconds that the local adapter is discoverable
@@ -228,8 +228,8 @@ class BTKbDevice:
     """
         return self.adapter_props.Get(self.ADAPTER_IFACE, 'DiscoverableTimeout')
 
-    @discoverabletimeout.setter
-    def discoverabletimeout(self, new_timeout):
+    @discoverable_timeout.setter
+    def discoverable_timeout(self, new_timeout):
         self.adapter_property.Set(self.ADAPTER_IFACE,
                                   'DiscoverableTimeout',
                                   dbus.UInt32(new_timeout))
@@ -238,7 +238,7 @@ class BTKbDevice:
     def discoverable(self):
         """
     The discoverable function is a getter function that returns the discoverable state of the adapter.
-    The discoverable state is a boolean value that indicates whether or not the adapter can be discovered by other devices.
+    The discoverable state is a boolean value that indicates whether the adapter can be discovered by other devices.
 
     :param self: Refer to the object itself
     :return: The boolean value of the discoverable property
@@ -268,7 +268,7 @@ class BTKbDevice:
     the bus, path, and UUID as parameters. The profile manager registers this new profile.
 
     :param self: Represent the instance of the class
-    :return: The profile manager and the humaninterfacedeviceprofile
+    :return: The profile manager and the human interface device profile
     :doc-author: Jakub Cermak
     """
         print('Configuring Bluez Profile')
@@ -356,13 +356,13 @@ class BTKbDevice:
         print(msg)
         print(self.cinterrupt.send(bytes(bytearray(msg))))
 
-    def reconnect(self, hidHost):
+    def reconnect(self, hid_host):
         """
     The reconnect function is used to re-establish a connection with the controller.
     It will attempt to connect every second until it succeeds.
 
     :param self: Represent the instance of the class
-    :param hidHost: Specify the mac address of the device to connect to
+    :param hid_host: Specify the mac address of the device to connect to
     :return: The following:
     :doc-author: Jakub Cermak
     """
@@ -376,8 +376,8 @@ class BTKbDevice:
                 self.cinterrupt = socket.socket(socket.AF_BLUETOOTH,
                                                 socket.SOCK_SEQPACKET,
                                                 socket.BTPROTO_L2CAP)
-                self.ccontrol.connect((hidHost, self.P_CTRL))
-                self.cinterrupt.connect((hidHost, self.P_INTR))
+                self.ccontrol.connect((hid_host, self.P_CTRL))
+                self.cinterrupt.connect((hid_host, self.P_INTR))
                 print("Connected!")
             except Exception as ex:
                 print("didnt connect, will retry..." + str(ex))
@@ -386,9 +386,9 @@ class BTKbDevice:
 
 class BTKbService(dbus.service.Object):
     """
-    Setup of a D-Bus service to recieve HID messages from other
+    Setup of a D-Bus service to receive HID messages from other
     processes.
-    Send the recieved HID messages to the Bluetooth HID server to send
+    Send the received HID messages to the Bluetooth HID server to send
     """
 
     def __init__(self):
@@ -406,7 +406,7 @@ class BTKbService(dbus.service.Object):
                                         bus=dbus.SystemBus())
         dbus.service.Object.__init__(self, bus_name, '/org/jc/btkbservice')
 
-        # create and setup our device
+        # create and set up our device
         self.device = BTKbDevice()
 
         # start listening for socket connections
