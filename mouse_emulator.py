@@ -34,10 +34,10 @@ class MouseEmulator(cmd2.Cmd):
                                 "is 0")
 
     @cmd2.with_argparser(move_pars)
-    def do_emu_movement(self, args: argparse.Namespace):
+    def do_movement(self, args: argparse.Namespace):
 
         """
-    The do_emu_movement function emulates mouse movement by sending a series of
+    The do_movement function emulates mouse movement by sending a series of
     mouse events to the host. The function takes two arguments, x and y, which are relative
     coordinates that specify how far the mouse should move in each direction. The function then
     calculates how many steps it will take to reach those coordinates and sends a series of
@@ -93,10 +93,10 @@ class MouseEmulator(cmd2.Cmd):
                                  "release")
 
     @cmd2.with_argparser(press_pars)
-    def do_emu_btn_press(self, args: argparse.Namespace):
+    def do_btn_press(self, args: argparse.Namespace):
 
         """
-    The do_emu_btn_press function is a function that emulates a mouse click.
+    The do_btn_press function is a function that emulates a mouse click.
 
     :param self: Represent the instance of the class
     :param args: argparse.Namespace: Pass the arguments from the command line to the function

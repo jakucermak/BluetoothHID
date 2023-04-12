@@ -353,8 +353,7 @@ class BTKbDevice:
     :return: The number of bytes sent
     :doc-author: Jakub Cermak
     """
-        print(msg)
-        print(self.cinterrupt.send(bytes(bytearray(msg))))
+        self.cinterrupt.send(bytes(bytearray(msg)))
 
     def reconnect(self, hid_host):
         """
