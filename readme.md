@@ -34,7 +34,7 @@ Here is an outline of things I changed:
 
 ## Moved to Python3
 
-I wanted to do this because not only is it a good thing to do but it also allowed some of the dependancies to be
+I wanted to do this because not only is it a good thing to do, but it also allowed some of the dependencies to be
 removed. After Python 3.3 Bluetooth sockets are supported in the native Python installs. The downside to this is that
 there are clear distinctions between str and bytes in the code. For me, this broke the keyboard client. This is what
 required the biggest re-write to get Python3 working.
@@ -53,20 +53,20 @@ original author says the way this was documented could be improved. If you want 
 plugin) from the command line then the following would seem the preferred:
 
 ```
-sudo /usr/lib/bluetooth/bluetoothd -P input
+sudo /usr/libexec/bluetooth/bluetoothd -P input
 ```
 
 If you want to make this the default for this Raspberry Pi then modify the `/lib/systemd/system/bluetooth.service` file.
 You will need to change the Service line from:
 
 ```
-ExecStart=/usr/lib/bluetooth/bluetoothd
+ExecStart=/usr/libexec/bluetooth/bluetoothd
 ```
 
 to
 
 ```
-ExecStart=/usr/lib/bluetooth/bluetoothd -P input
+ExecStart=/usr/libexec/bluetooth/bluetoothd -P input
 ```
 
 ## Configure D-Bus
@@ -117,7 +117,7 @@ Below is a transcript from the two terminal I had open for this experiment.
 
 ```
 pi@raspberrypi:~/python/bluetooth_hid/btkeyboard/server $ sudo service bluetooth stop
-pi@raspberrypi:~/python/bluetooth_hid/btkeyboard/server $ sudo /usr/lib/bluetooth/bluetoothd -P input &
+pi@raspberrypi:~/python/bluetooth_hid/btkeyboard/server $ sudo /usr/libexec/bluetooth/bluetoothd -P input &
 pi@raspberrypi:~/python/bluetooth_hid/btkeyboard/server $ sudo python3 btk_server.py
 Setting up service
 Setting up BT device
@@ -145,7 +145,7 @@ starting event loop
 Listening...
 ```
 
-TODO
+### TODO
 
-* Unify file and service names (as mentioned at the begining of mouse client and keyboard client)
-* Fix: OSError: [Errno 98] Address already in use #1
+- [x] Unify file and service names (as mentioned at the beginning of mouse client and keyboard client)
+- [x] ***INVESTIGATE***: OSError: [Errno 98] Address already in use #1
