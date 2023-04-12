@@ -16,6 +16,16 @@ class Mouse:
     def __init__(self, mode: str, t: float = 0):
         # the structure for a bluetooth mouse input report (size is 6 bytes)
 
+        """
+    The __init__ function is called when the class is instantiated.
+    It sets up the DBus connection and waits for a mouse to be connected.
+    If it can't find a mouse after 100 tries, it will exit.
+
+    :param self: Represent the instance of the class
+    :param mode: str: Determine whether the device is a mouse or keyboard
+    :param t: float: Set the time between each mouse movement
+    :doc-author: Jakub Cermak
+    """
         print("Setting up DBus Client")
 
         self.bus = dbus.SystemBus()
@@ -67,18 +77,21 @@ class Mouse:
 
     # take care of mouse buttons
     def change_state_button(self, event):
+        """
+    The change_state_button function is called when the mouse button is pressed.
+    It takes in an event as a parameter and checks to see if it's one of the three buttons on the mouse.
+    If it is, then we change our state array to reflect that button being pressed.
+
+    :param self: Represent the instance of the class
+    :param event: Get the event code and value from the mouse
+    :return: The state of the mouse
+    :doc-author: Jakub Cermak
+    """
         if event.code == ecodes.BTN_LEFT:
-            print(f'Button: {event.code}')
-            print(f'Value {event.value}')
             self.state[2] = event.value
-            print(f'State: {self.state[2]}')
         elif event.code == ecodes.BTN_RIGHT:
-            print(f'Button: {event.code}')
-            print(f'Value {event.value}')
             self.state[2] = 2 * event.value
-            print(f'State: {self.state[2]}')
         elif event.code == ecodes.BTN_MIDDLE:
-            print("Middle Mouse Button Pressed")
             self.state[2] = 3 * event.value
         self.state[3] = 0x00
         self.state[4] = 0x00
@@ -86,6 +99,16 @@ class Mouse:
 
     # take care of mouse movements
     def change_state_movement(self, event):
+        """
+    The change_state_movement function is used to update the state of the mouse.
+    The function takes in an event as a parameter and checks if it is a movement event.
+    If so, then it updates the state of that particular axis with its value.
+
+    :param self: Represent the instance of the class
+    :param event: Get the event code and value from the mouse
+    :return: The state of the mouse
+    :doc-author: Jakub Cermak
+    """
         if event.code == ecodes.REL_X:
             self.state[3] = event.value & 0xFF
         elif event.code == ecodes.REL_Y:
@@ -95,6 +118,14 @@ class Mouse:
 
     # poll for mouse events
     def event_loop(self):
+        """
+    The event_loop function is the main function of this class. It reads events from the device and calls
+    the change_state_button and change_state_movement functions to update the state of buttons and movement, respectively.
+    It then sends input to a server using send_input.
+
+    :param self: Refer to the current instance of a class
+    :doc-author: Jakub Cermak
+    """
         for event in self.dev.read_loop():
             if event.type == ecodes.EV_KEY and event.value < 2:
                 self.change_state_button(event)
@@ -103,12 +134,22 @@ class Mouse:
             try:
                 self.send_input()
             except Exception:
-
                 print("Couldn't send mouse input")
 
-    # simulate mouse movement using relative coordinates
     def simulate_move(self, rel_x, rel_y):
 
+        """
+    The simulate_move function takes in two arguments, rel_x and rel_y.
+    rel_x is the relative x-coordinate of the mouse movement, while rel_y is the relative y-coordinate of the mouse movement.
+    The function then sets self.state[3] to be equal to rel_x and self.state[4] to be equal to rel_y (the 3rd and 4th elements in state are for x/y coordinates).
+    It then sleeps for t seconds (t being a class variable) before sending input with send input().
+
+    :param self: Access the attributes and methods of a class
+    :param rel_x: Determine the relative x position of the mouse
+    :param rel_y: Move the mouse up and down
+    :return: The new state of the mouse
+    :doc-author: Jakub Cermak
+    """
         self.state[3] = rel_x
         self.state[4] = rel_y
 
@@ -120,23 +161,50 @@ class Mouse:
         except Exception as e:
             print(e)
 
-    # simulate mouse click, parameter used to identify which button to use
     def simulate_click(self, button):
+        """
+    The simulate_click function takes in a button number and simulates a click of that button.
+        If the button is positive, it will toggle the state of that specific bit to 1.
+        If the button is negative, it will toggle all bits to 0.
 
+    :param self: Represent the instance of the class
+    :param button: Determine which button is being pressed
+    :return: The state of the mouse
+    :doc-author: Jakub Cermak
+    """
         if button > 0:
             self.state[2] = button * self.button_toggle(button)
         else:
             self.state[2] = self.button_toggle(button)
-            pass
 
     def button_toggle(self, button):
+
+        """
+    The button_toggle function takes a button as an argument and returns the opposite of its current state.
+        If the button is currently pressed, it will return 0 (unpressed).
+        If the button is currently unpressed, it will return 1 (pressed).
+
+    :param self: Access the attributes and methods of a class
+    :param button: Determine which button is being pressed
+    :return: The state of the button
+    :doc-author: Jakub Cermak
+    """
         if self.state[2] / button == 0:
             return 1
         else:
             return 0
 
-    # forward mouse events to the dbus service
     def send_input(self):
+        """
+    The send_input function is used to send the mouse state to the interface.
+    The function takes no arguments and returns nothing. The function uses
+    the iface variable from the class, which is an instance of a class that
+    implements a method called send_mouse(state).
+
+    :param self: Refer to the current instance of a class
+    :return: The state of the mouse
+    :doc-author: Jakub Cermak
+    """
         self.iface.send_mouse(self.state)
 
 
