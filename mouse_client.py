@@ -6,9 +6,8 @@ import evdev  # used to get input from the mouse
 from evdev import InputDevice, ecodes
 import argparse
 
-
-HID_DBUS = 'org.yaptb.btkbservice'
-HID_SRVC = '/org/yaptb/btkbservice'
+HID_DBUS = 'org.jc.btkbservice'
+HID_SRVC = '/org/jc/btkbservice'
 
 
 # define a client to listen to local mouse events
@@ -34,7 +33,7 @@ class Mouse:
             while have_dev is False and count < NUMBER_OF_TRIES:
                 try:
                     # try and get a mouse - loop through all devices and try to find a mouse
-                    devices = [evdev.InputDevice(fn)
+                    devices = [InputDevice(fn)
                                for fn in evdev.list_devices()]
                     for device in reversed(devices):
                         if "mouse" in device.name.lower():
@@ -69,11 +68,15 @@ class Mouse:
     # take care of mouse buttons
     def change_state_button(self, event):
         if event.code == ecodes.BTN_LEFT:
-            print("Left Mouse Button Pressed")
+            print(f'Button: {event.code}')
+            print(f'Value {event.value}')
             self.state[2] = event.value
+            print(f'State: {self.state[2]}')
         elif event.code == ecodes.BTN_RIGHT:
-            print("Right Mouse Button Pressed")
+            print(f'Button: {event.code}')
+            print(f'Value {event.value}')
             self.state[2] = 2 * event.value
+            print(f'State: {self.state[2]}')
         elif event.code == ecodes.BTN_MIDDLE:
             print("Middle Mouse Button Pressed")
             self.state[2] = 3 * event.value
@@ -100,13 +103,14 @@ class Mouse:
             try:
                 self.send_input()
             except Exception:
+
                 print("Couldn't send mouse input")
 
-    # silmulate mouse movement using relative cooridinates
-    def simulate_move(self, relX, relY):
+    # simulate mouse movement using relative coordinates
+    def simulate_move(self, rel_x, rel_y):
 
-        self.state[3] = relX
-        self.state[4] = relY
+        self.state[3] = rel_x
+        self.state[4] = rel_y
 
         try:
             time.sleep(self.t)
@@ -115,16 +119,32 @@ class Mouse:
             self.state[4] = 0
         except Exception as e:
             print(e)
-    # forward mouse events to the dbus service
 
+    # simulate mouse click, parameter used to identify which button to use
+    def simulate_click(self, button):
+
+        if button > 0:
+            self.state[2] = button * self.button_toggle(button)
+        else:
+            self.state[2] = self.button_toggle(button)
+            pass
+
+    def button_toggle(self, button):
+        if self.state[2] / button == 0:
+            return 1
+        else:
+            return 0
+
+    # forward mouse events to the dbus service
     def send_input(self):
         self.iface.send_mouse(self.state)
 
 
 parser = argparse.ArgumentParser(
-    description="Creates mouse client for control device(computer, phone,..) connected over BT over mouse or simulate movement")
+    description="Creates mouse client for control device(computer, phone,..) connected over BT over mouse or simulate "
+                "movement")
 parser.add_argument('--dev', default="mouse", type=str, choices=[
-                    "mouse", "simulate"], help="set if you want to simulate mouse or use real device")
+    "mouse", "simulate"], help="set if you want to simulate mouse or use real device")
 
 if __name__ == "__main__":
     print("Setting up mouse Client")
@@ -137,4 +157,3 @@ if __name__ == "__main__":
     elif "simulate" == args.dev:
         mouse = Mouse("simulate", args.t)
         print("Simulating mouse movement")
-

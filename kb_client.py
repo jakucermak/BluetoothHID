@@ -7,8 +7,8 @@ from sshkeyboard import listen_keyboard
 
 from time import sleep
 
-HID_DBUS = 'org.yaptb.btkbservice'
-HID_SRVC = '/org/yaptb/btkbservice'
+HID_DBUS = 'org.jc.btkbservice'
+HID_SRVC = '/org/jc/btkbservice'
 
 
 class Kbrd:
@@ -37,7 +37,7 @@ class Kbrd:
         /dev/input/event
         :param event_id: Optional parameter if the keyboard is not event0
         """
-        
+
         while self.have_kb is False:
             try:
                 devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
@@ -60,7 +60,7 @@ class Kbrd:
         :param mod_key: The value of the bit to be updated with new value
         :param value: Binary 1 or 0 depending if pressed or released
         """
-        bit_mask = 1 << (7-mod_key)
+        bit_mask = 1 << (7 - mod_key)
         if value:  # set bit
             self.mod_keys |= bit_mask
         else:  # clear bit

@@ -13,11 +13,11 @@ import dbus
 import dbus.service
 import socket
 
-
 from gi.repository import GLib
 from dbus.mainloop.glib import DBusGMainLoop
 
 import xml.etree.ElementTree as ET
+
 
 class HumanInterfaceDeviceProfile(dbus.service.Object):
     """
@@ -28,29 +28,29 @@ class HumanInterfaceDeviceProfile(dbus.service.Object):
     @dbus.service.method('org.bluez.Profile1',
                          in_signature='', out_signature='')
     def Release(self):
-            print('Release')
-            mainloop.quit()
+        print('Release')
+        mainloop.quit()
 
     @dbus.service.method('org.bluez.Profile1',
                          in_signature='oha{sv}', out_signature='')
     def NewConnection(self, path, fd, properties):
-            self.fd = fd.take()
-            print('NewConnection({}, {})'.format(path, self.fd))
-            for key in properties.keys():
-                    if key == 'Version' or key == 'Features':
-                            print('  {} = 0x{:04x}'.format(key,
-                                                           properties[key]))
-                    else:
-                            print('  {} = {}'.format(key, properties[key]))
+        self.fd = fd.take()
+        print('NewConnection({}, {})'.format(path, self.fd))
+        for key in properties.keys():
+            if key == 'Version' or key == 'Features':
+                print('  {} = 0x{:04x}'.format(key,
+                                               properties[key]))
+            else:
+                print('  {} = {}'.format(key, properties[key]))
 
     @dbus.service.method('org.bluez.Profile1',
                          in_signature='o', out_signature='')
     def RequestDisconnection(self, path):
-            print('RequestDisconnection {}'.format(path))
+        print('RequestDisconnection {}'.format(path))
 
-            if self.fd > 0:
-                    os.close(self.fd)
-                    self.fd = -1
+        if self.fd > 0:
+            os.close(self.fd)
+            self.fd = -1
 
 
 class BTKbDevice:
@@ -63,14 +63,14 @@ class BTKbDevice:
     # Service port - must match port configured in SDP record#Interrrupt port
     P_INTR = 19
     # BlueZ dbus
-    PROFILE_DBUS_PATH = '/bluez/yaptb/btkb_profile'
+    PROFILE_DBUS_PATH = '/bluez/jc/btkb_profile'
     ADAPTER_IFACE = 'org.bluez.Adapter1'
     DEVICE_INTERFACE = 'org.bluez.Device1'
     DBUS_PROP_IFACE = 'org.freedesktop.DBus.Properties'
     DBUS_OM_IFACE = 'org.freedesktop.DBus.ObjectManager'
 
     # file path of the sdp record to laod
-    install_dir  = os.path.dirname(os.path.realpath(__file__))
+    install_dir = os.path.dirname(os.path.realpath(__file__))
     SDP_RECORD_PATH = os.path.join(install_dir,
                                    'sdp_record.xml')
     # UUID for HID service (1124)
@@ -113,7 +113,7 @@ class BTKbDevice:
         self.discoverabletimeout = 0
         self.discoverable = True
 
-    def interfaces_added(self,path,device_info):
+    def interfaces_added(self, path, device_info):
         pass
 
     def _properties_changed(self, interface, changed, invalidated, path):
@@ -247,7 +247,7 @@ class BTKbDevice:
 
         self.cinterrupt, cinfo = self.sinterrupt.accept()
         print('{} connected on the interrupt channel'.format(cinfo[0]))
-        
+
     def send(self, msg):
         """
         Send HID message
@@ -255,7 +255,6 @@ class BTKbDevice:
         """
         print(msg)
         print(self.cinterrupt.send(bytes(bytearray(msg))))
-
 
     def reconnect(self, hidHost):
         print("Trying reconnect...")
@@ -275,40 +274,42 @@ class BTKbDevice:
                 print("didnt connect, will retry..." + str(ex))
                 time.sleep(1)
 
+
 class BTKbService(dbus.service.Object):
     """
     Setup of a D-Bus service to recieve HID messages from other
     processes.
     Send the recieved HID messages to the Bluetooth HID server to send
     """
+
     def __init__(self):
         print('Setting up service')
 
-        bus_name = dbus.service.BusName('org.yaptb.btkbservice',
+        bus_name = dbus.service.BusName('org.jc.btkbservice',
                                         bus=dbus.SystemBus())
-        dbus.service.Object.__init__(self, bus_name, '/org/yaptb/btkbservice')
+        dbus.service.Object.__init__(self, bus_name, '/org/jc/btkbservice')
 
         # create and setup our device
         self.device = BTKbDevice()
 
         # start listening for socket connections
         self.device.listen()
-    
-    @dbus.service.method('org.yaptb.btkbservice',
-                        in_signature='ay')
+
+    @dbus.service.method('org.jc.btkbservice',
+                         in_signature='ay')
     def send_keys(self, keys):
         self.device.send(keys)
-    
-    
-    @dbus.service.method('org.yaptb.btkbservice',in_signature='ai')
+
+    @dbus.service.method('org.jc.btkbservice', in_signature='ai')
     def send_mouse(self, state):
         print("Received Mouse Input, sending it via Bluetooth")
-        
+
         self.device.send(state)
-        
+
     @dbus.service.method('org.freedesktop.DBus.Introspectable', out_signature='s')
     def Introspect(self):
-          return ET.tostring(ET.parse(os.getcwd()+'/org.yaptb.hidbluetooth.introspection').getroot(), encoding='utf8', method='xml')
+        return ET.tostring(ET.parse(os.getcwd() + '/org.jc.hidbluetooth.introspection').getroot(), encoding='utf8',
+                           method='xml')
 
 
 if __name__ == '__main__':

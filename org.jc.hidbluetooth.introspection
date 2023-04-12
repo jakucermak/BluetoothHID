@@ -1,12 +1,12 @@
 <!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
          "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
-        <node name="/org/yaptb/btkbservice">
-          <interface name="org.yaptb.btkbservice">
+        <node name="/org/jc/btkbservice">
+          <interface name="org.jc.btkbservice">
             <method name="send_keys">
               <arg name="keys" type="ay" direction="in"/>
             </method>
           </interface>
-          <interface name="org.yaptb.btkbservice">
+          <interface name="org.jc.btkbservice">
             <method name="send_mouse">
               <arg name="rel_move" type="ai" direction="in"/>
             </method>

@@ -1,2 +1,2 @@
 evdev
-npyscreen
+cmd2
