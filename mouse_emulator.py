@@ -1,4 +1,4 @@
-from mouse_client import Mouse
+from clients.mouse_client import Mouse
 import argparse
 import cmd2
 

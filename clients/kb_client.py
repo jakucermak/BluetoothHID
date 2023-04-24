@@ -1,7 +1,7 @@
 import dbus
 import evdev
 from evdev import InputDevice
-import keymap
+from utils import keymap
 
 from sshkeyboard import listen_keyboard
 

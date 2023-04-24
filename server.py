@@ -2,7 +2,7 @@
 """
 Bluetooth HID keyboard emulator DBUS Service
 Original idea taken from:
-http://yetanotherpointlesstechblog.blogspot.com/2016/04/emulating-bluetooth-keyboard-with.html
+https://yetanotherpointlesstechblog.blogspot.com/2016/04/emulating-bluetooth-keyboard-with.html
 Moved to Python 3 and tested with BlueZ 5.43
 """
 import os
@@ -72,7 +72,7 @@ class BTKbDevice:
     # file path of the sdp record to load
     install_dir = os.path.dirname(os.path.realpath(__file__))
     SDP_RECORD_PATH = os.path.join(install_dir,
-                                   'sdp_record.xml')
+                                   'bt_config/sdp_record.xml')
     # UUID for HID service (1124)
     # https://www.bluetooth.com/specifications/assigned-numbers/service-discovery
     UUID = '00001124-0000-1000-8000-00805f9b34fb'
@@ -448,7 +448,8 @@ class BTKbService(dbus.service.Object):
     :return: The xml introspection data for the plugin
     :doc-author: Jakub Cermak
     """
-        return ET.tostring(ET.parse(os.getcwd() + '/org.jc.hidbluetooth.introspection').getroot(), encoding='utf8',
+        return ET.tostring(ET.parse(os.getcwd() + '/bt_config/org.jc.hidbluetooth.introspection').getroot(),
+                           encoding='utf8',
                            method='xml')
 
 
