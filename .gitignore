@@ -4,4 +4,5 @@ sftp-config.json
 .DS_Store
 .idea
 venv
+*.pcap
 *.log
