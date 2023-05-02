@@ -17,7 +17,10 @@ from gi.repository import GLib
 from dbus.mainloop.glib import DBusGMainLoop
 
 import xml.etree.ElementTree as ET
+from utils.logger import Logger, LogLevels
 
+
+logger = Logger("hid")
 
 class HumanInterfaceDeviceProfile(dbus.service.Object):
     """
@@ -93,7 +96,7 @@ class BTKbDevice:
         self.sinterrupt = None
         self.cinterrupt = None  # Socket object for interrupt
         self.dev_path = '/org/bluez/hci{}'.format(hci)
-        print('Setting up BT device')
+        logger.log('Setting up BT device',LogLevels.INFO)
         self.bus = dbus.SystemBus()
         self.adapter_methods = dbus.Interface(
             self.bus.get_object('org.bluez', self.dev_path), self.ADAPTER_IFACE)
@@ -110,8 +113,7 @@ class BTKbDevice:
                                      arg0=self.DEVICE_INTERFACE,
                                      path_keyword='path')
 
-        print('Configuring for name {}'.format(BTKbDevice.MY_DEV_NAME))
-
+        logger.log('Configuring for name {}'.format(BTKbDevice.MY_DEV_NAME),LogLevels.INFO)
         self.config_hid_profile()
 
         # set the Bluetooth device configuration
@@ -152,7 +154,7 @@ class BTKbDevice:
     :return: The client has been disconnected
     :doc-author: Jakub Cermak
     """
-        print('The client has been disconnect')
+        logger.log('The client has been disconnect', LogLevels.INFO)
         self.listen()
 
     @property
@@ -271,7 +273,7 @@ class BTKbDevice:
     :return: The profile manager and the human interface device profile
     :doc-author: Jakub Cermak
     """
-        print('Configuring Bluez Profile')
+        logger.log('Configuring Bluez Profile', LogLevels.INFO)
         service_record = self.read_sdp_service_record()
 
         opts = {
@@ -289,7 +291,7 @@ class BTKbDevice:
 
         manager.RegisterProfile(BTKbDevice.PROFILE_DBUS_PATH, BTKbDevice.UUID, opts)
 
-        print('Profile registered ')
+        logger.log('Profile registered', LogLevels.INFO)
 
     @staticmethod
     def read_sdp_service_record():
@@ -301,7 +303,8 @@ class BTKbDevice:
     :return: The contents of the sdp record
     :doc-author: Jakub Cermak
     """
-        print('Reading service record')
+
+        logger.log('Reading service record', LogLevels.INFO)
         try:
             fh = open(BTKbDevice.SDP_RECORD_PATH, 'r')
         except OSError:
@@ -319,7 +322,7 @@ class BTKbDevice:
     :return: The control and interrupt sockets
     :doc-author: Jakub Cermak
     """
-        print('Waiting for connections')
+        logger.log('Waiting for connections', LogLevels.INFO)
         self.scontrol = socket.socket(socket.AF_BLUETOOTH,
                                       socket.SOCK_SEQPACKET,
                                       socket.BTPROTO_L2CAP)
@@ -336,10 +339,10 @@ class BTKbDevice:
         self.sinterrupt.listen(1)
 
         self.ccontrol, cinfo = self.scontrol.accept()
-        print('{} connected on the control socket'.format(cinfo[0]))
+        logger.log('{} connected on the control socket'.format(cinfo[0]), LogLevels.INFO)
 
         self.cinterrupt, cinfo = self.sinterrupt.accept()
-        print('{} connected on the interrupt channel'.format(cinfo[0]))
+        logger.log('{} connected on the interrupt channel'.format(cinfo[0]), LogLevels.INFO)
 
     def send(self, msg):
 
@@ -353,6 +356,8 @@ class BTKbDevice:
     :return: The number of bytes sent
     :doc-author: Jakub Cermak
     """
+
+        logger.log(msg,LogLevels.INFO)
         self.cinterrupt.send(bytes(bytearray(msg)))
 
     def reconnect(self, hid_host):
@@ -365,7 +370,7 @@ class BTKbDevice:
     :return: The following:
     :doc-author: Jakub Cermak
     """
-        print("Trying reconnect...")
+        logger.log("Trying reconnect...", LogLevels.INFO)
         while True:
             try:
                 # hidHost = 'XX:XX:XX:XX:XX:XX'
@@ -389,6 +394,7 @@ class BTKbService(dbus.service.Object):
     processes.
     Send the received HID messages to the Bluetooth HID server to send
     """
+    logger = Logger("service")
 
     def __init__(self):
         """
@@ -399,7 +405,7 @@ class BTKbService(dbus.service.Object):
     :return: Nothing
     :doc-author: Jakub Cermak
     """
-        print('Setting up service')
+        logger.log('Setting up service', LogLevels.INFO)
 
         bus_name = dbus.service.BusName('org.jc.btkbservice',
                                         bus=dbus.SystemBus())
