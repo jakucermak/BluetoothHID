@@ -19,8 +19,7 @@ from dbus.mainloop.glib import DBusGMainLoop
 import xml.etree.ElementTree as ET
 from utils.logger import Logger, LogLevels
 
-
-logger = Logger("hid")
+server_log = Logger("server")
 
 class HumanInterfaceDeviceProfile(dbus.service.Object):
     """
@@ -31,14 +30,14 @@ class HumanInterfaceDeviceProfile(dbus.service.Object):
     @dbus.service.method('org.bluez.Profile1',
                          in_signature='', out_signature='')
     def Release(self):
-        print('Release')
+        server_log.log("Release", LogLevels.INFO)
         mainloop.quit()
 
     @dbus.service.method('org.bluez.Profile1',
                          in_signature='oha{sv}', out_signature='')
     def NewConnection(self, path, fd, properties):
         self.fd = fd.take()
-        print('NewConnection({}, {})'.format(path, self.fd))
+        server_log.log('NewConnection({}, {})'.format(path, self.fd), LogLevels.INFO)
         for key in properties.keys():
             if key == 'Version' or key == 'Features':
                 print('  {} = 0x{:04x}'.format(key,
@@ -49,7 +48,7 @@ class HumanInterfaceDeviceProfile(dbus.service.Object):
     @dbus.service.method('org.bluez.Profile1',
                          in_signature='o', out_signature='')
     def RequestDisconnection(self, path):
-        print('RequestDisconnection {}'.format(path))
+        server_log.log('RequestDisconnection {}'.format(path), LogLevels.INFO)
 
         if self.fd > 0:
             os.close(self.fd)
@@ -66,6 +65,7 @@ class BTKbDevice:
     # Service port - must match port configured in SDP record#Interrrupt port
     P_INTR = 19
     # BlueZ dbus
+    # possible error below is path to registered profile 
     PROFILE_DBUS_PATH = '/bluez/jc/btkb_profile'
     ADAPTER_IFACE = 'org.bluez.Adapter1'
     DEVICE_INTERFACE = 'org.bluez.Device1'
@@ -79,6 +79,7 @@ class BTKbDevice:
     # UUID for HID service (1124)
     # https://www.bluetooth.com/specifications/assigned-numbers/service-discovery
     UUID = '00001124-0000-1000-8000-00805f9b34fb'
+    
 
     def __init__(self, hci=0):
         """
@@ -96,7 +97,7 @@ class BTKbDevice:
         self.sinterrupt = None
         self.cinterrupt = None  # Socket object for interrupt
         self.dev_path = '/org/bluez/hci{}'.format(hci)
-        logger.log('Setting up BT device',LogLevels.INFO)
+        server_log.log('Setting up BT device', LogLevels.INFO)
         self.bus = dbus.SystemBus()
         self.adapter_methods = dbus.Interface(
             self.bus.get_object('org.bluez', self.dev_path), self.ADAPTER_IFACE)
@@ -113,7 +114,8 @@ class BTKbDevice:
                                      arg0=self.DEVICE_INTERFACE,
                                      path_keyword='path')
 
-        logger.log('Configuring for name {}'.format(BTKbDevice.MY_DEV_NAME),LogLevels.INFO)
+        server_log.log('Configuring for name {}'.format(BTKbDevice.MY_DEV_NAME),
+                                                            LogLevels.INFO)
         self.config_hid_profile()
 
         # set the Bluetooth device configuration
@@ -154,7 +156,7 @@ class BTKbDevice:
     :return: The client has been disconnected
     :doc-author: Jakub Cermak
     """
-        logger.log('The client has been disconnect', LogLevels.INFO)
+        server_log.log('The client has been disconnect', LogLevels.INFO)
         self.listen()
 
     @property
@@ -168,6 +170,7 @@ class BTKbDevice:
     :return: The adapter mac address
     :doc-author: Jakub Cermak
     """
+
         return self.adapter_property.Get(self.ADAPTER_IFACE, 'Address')
 
     @property
@@ -180,6 +183,7 @@ class BTKbDevice:
     :return: A boolean value
     :doc-author: Jakub Cermak
     """
+
         return self.adapter_property.Get(self.ADAPTER_IFACE, 'Powered')
 
     @powered.setter
@@ -192,11 +196,11 @@ class BTKbDevice:
     :return: The new state of the adapter
     :doc-author: Jakub Cermak
     """
+
         self.adapter_property.Set(self.ADAPTER_IFACE, 'Powered', new_state)
 
     @property
     def alias(self):
-
         """
     The alias function returns the alias of the adapter.
 
@@ -204,11 +208,11 @@ class BTKbDevice:
     :return: The alias of the adapter
     :doc-author: Jakub Cermak
     """
+
         return self.adapter_property.Get(self.ADAPTER_IFACE, 'Alias')
 
     @alias.setter
     def alias(self, new_alias):
-
         """
     The alias function sets the alias of the adapter to a new value.
 
@@ -217,6 +221,7 @@ class BTKbDevice:
     :return: The alias of the adapter
     :doc-author: Jakub Cermak
     """
+
         self.adapter_property.Set(self.ADAPTER_IFACE, 'Alias', new_alias)
 
     @property
@@ -228,6 +233,7 @@ class BTKbDevice:
     :return: The timeout value in seconds that the local adapter is discoverable
     :doc-author: Jakub Cermak
     """
+
         return self.adapter_props.Get(self.ADAPTER_IFACE, 'DiscoverableTimeout')
 
     @discoverable_timeout.setter
@@ -246,11 +252,11 @@ class BTKbDevice:
     :return: The boolean value of the discoverable property
     :doc-author: Jakub Cermak
     """
+
         return self.adapter_props.Get(self.ADAPTER_INTERFACE, 'Discoverable')
 
     @discoverable.setter
     def discoverable(self, new_state):
-
         """
     The discoverable function sets the discoverable state of the adapter.
 
@@ -259,6 +265,7 @@ class BTKbDevice:
     :return: The state of the adapter
     :doc-author: Jakub Cermak
     """
+
         self.adapter_property.Set(self.ADAPTER_IFACE, 'Discoverable', new_state)
 
     def config_hid_profile(self):
@@ -273,7 +280,7 @@ class BTKbDevice:
     :return: The profile manager and the human interface device profile
     :doc-author: Jakub Cermak
     """
-        logger.log('Configuring Bluez Profile', LogLevels.INFO)
+        server_log.log('Configuring Bluez Profile', LogLevels.INFO)
         service_record = self.read_sdp_service_record()
 
         opts = {
@@ -291,7 +298,7 @@ class BTKbDevice:
 
         manager.RegisterProfile(BTKbDevice.PROFILE_DBUS_PATH, BTKbDevice.UUID, opts)
 
-        logger.log('Profile registered', LogLevels.INFO)
+        server_log.log('Profile registered ', LogLevels.INFO)
 
     @staticmethod
     def read_sdp_service_record():
@@ -303,8 +310,7 @@ class BTKbDevice:
     :return: The contents of the sdp record
     :doc-author: Jakub Cermak
     """
-
-        logger.log('Reading service record', LogLevels.INFO)
+        server_log.log('Reading service record', LogLevels.INFO)
         try:
             fh = open(BTKbDevice.SDP_RECORD_PATH, 'r')
         except OSError:
@@ -322,7 +328,7 @@ class BTKbDevice:
     :return: The control and interrupt sockets
     :doc-author: Jakub Cermak
     """
-        logger.log('Waiting for connections', LogLevels.INFO)
+        server_log.log('Waiting for connections', LogLevels.INFO)
         self.scontrol = socket.socket(socket.AF_BLUETOOTH,
                                       socket.SOCK_SEQPACKET,
                                       socket.BTPROTO_L2CAP)
@@ -339,10 +345,10 @@ class BTKbDevice:
         self.sinterrupt.listen(1)
 
         self.ccontrol, cinfo = self.scontrol.accept()
-        logger.log('{} connected on the control socket'.format(cinfo[0]), LogLevels.INFO)
+        server_log.log('{} connected on the control socket'.format(cinfo[0]), LogLevels.INFO)
 
         self.cinterrupt, cinfo = self.sinterrupt.accept()
-        logger.log('{} connected on the interrupt channel'.format(cinfo[0]), LogLevels.INFO)
+        server_log.log('{} connected on the interrupt channel'.format(cinfo[0]), LogLevels.INFO)
 
     def send(self, msg):
 
@@ -357,7 +363,7 @@ class BTKbDevice:
     :doc-author: Jakub Cermak
     """
 
-        logger.log(msg,LogLevels.INFO)
+        # logger.logger(msg)
         self.cinterrupt.send(bytes(bytearray(msg)))
 
     def reconnect(self, hid_host):
@@ -370,7 +376,7 @@ class BTKbDevice:
     :return: The following:
     :doc-author: Jakub Cermak
     """
-        logger.log("Trying reconnect...", LogLevels.INFO)
+        server_log.log("Trying reconnect...", LogLevels.INFO)
         while True:
             try:
                 # hidHost = 'XX:XX:XX:XX:XX:XX'
@@ -382,9 +388,9 @@ class BTKbDevice:
                                                 socket.BTPROTO_L2CAP)
                 self.ccontrol.connect((hid_host, self.P_CTRL))
                 self.cinterrupt.connect((hid_host, self.P_INTR))
-                print("Connected!")
+                server_log.log("Connected!", LogLevels.INFO)
             except Exception as ex:
-                print("didnt connect, will retry..." + str(ex))
+                server_log.log("didnt connect, will retry..." + str(ex), LogLevels.WARN)
                 time.sleep(1)
 
 
@@ -394,7 +400,6 @@ class BTKbService(dbus.service.Object):
     processes.
     Send the received HID messages to the Bluetooth HID server to send
     """
-    logger = Logger("service")
 
     def __init__(self):
         """
@@ -405,7 +410,7 @@ class BTKbService(dbus.service.Object):
     :return: Nothing
     :doc-author: Jakub Cermak
     """
-        logger.log('Setting up service', LogLevels.INFO)
+        server_log.log('Setting up service', LogLevels.INFO)
 
         bus_name = dbus.service.BusName('org.jc.btkbservice',
                                         bus=dbus.SystemBus())

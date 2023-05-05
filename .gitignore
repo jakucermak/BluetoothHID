@@ -1,6 +1,7 @@
 *pycache*/
 .vscode/
 sftp-config.json
+._.DS_Store
 .DS_Store
 .idea
 venv

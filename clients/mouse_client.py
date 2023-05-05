@@ -14,8 +14,6 @@ HID_SRVC = '/org/jc/btkbservice'
 class Mouse:
 
     def __init__(self, mode: str, t: float = 0):
-        # the structure for a bluetooth mouse input report (size is 6 bytes)
-
         """
     The __init__ function is called when the class is instantiated.
     It sets up the DBus connection and waits for a mouse to be connected.
