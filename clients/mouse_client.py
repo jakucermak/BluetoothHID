@@ -5,12 +5,12 @@ import time
 import evdev  # used to get input from the mouse
 from evdev import InputDevice, ecodes
 import argparse
+from utils.logger import Logger, LogLevels
 
 HID_DBUS = 'org.jc.btkbservice'
 HID_SRVC = '/org/jc/btkbservice'
+logger = Logger("mouse_client")
 
-
-# define a client to listen to local mouse events
 class Mouse:
 
     def __init__(self, mode: str, t: float = 0):
@@ -24,13 +24,13 @@ class Mouse:
     :param t: float: Set the time between each mouse movement
     :doc-author: Jakub Cermak
     """
-        print("Setting up DBus Client")
+        logger.log("Setting up DBus Client", LogLevels.INFO)
 
         self.bus = dbus.SystemBus()
         self.bluetoothservice = self.bus.get_object(HID_DBUS, HID_SRVC)
         self.iface = dbus.Interface(self.bluetoothservice, HID_DBUS)
 
-        print("Waiting for mouse")
+        logger.log("Waiting for mouse", LogLevels.INFO)
 
         # keep trying to find a mouse
         have_dev = False
@@ -45,22 +45,22 @@ class Mouse:
                                for fn in evdev.list_devices()]
                     for device in reversed(devices):
                         if "mouse" in device.name.lower():
-                            print("Found a mouse with the keyword 'mouse'")
-                            print("device name is " + device.name)
+                            logger.log("Found a mouse with the keyword 'mouse'", LogLevels.INFO)
+                            logger.log("device name is " + device.name, LogLevels.INFO)
                             self.dev = InputDevice(device.path)
                             have_dev = True
                             break
                 except OSError:
-                    print("Mouse not found, waiting 3 seconds and retrying")
+                    logger.log("Mouse not found, waiting 3 seconds and retrying", LogLevels.ERR)
                     time.sleep(3)
                 count += 1
 
             if not have_dev:
-                print("Mouse not found after " +
-                      str(NUMBER_OF_TRIES) + " tries.")
+                logger.log("Mouse not found after " +
+                      str(NUMBER_OF_TRIES) + " tries.", LogLevels.INFO)
                 return
             else:
-                print("Mouse Found")
+                logger.log("Mouse Found", LogLevels.INFO)
         self.t = t
 
     state = [
@@ -132,7 +132,7 @@ class Mouse:
             try:
                 self.send_input()
             except Exception:
-                print("Couldn't send mouse input")
+                logger.log("Couldn't send mouse input", LogLevels.ERR)
 
     def simulate_move(self, rel_x, rel_y):
 
@@ -157,7 +157,7 @@ class Mouse:
             self.state[3] = 0
             self.state[4] = 0
         except Exception as e:
-            print(e)
+            logger.log(e, LogLevels.ERR)
 
     def simulate_click(self, button):
         """
@@ -213,13 +213,13 @@ parser.add_argument('--dev', default="mouse", type=str, choices=[
     "mouse", "simulate"], help="set if you want to simulate mouse or use real device")
 
 if __name__ == "__main__":
-    print("Setting up mouse Client")
+    logger.log("Setting up mouse Client", LogLevels.INFO)
 
     args = parser.parse_args()
     if "mouse" == args.dev:
         mouse = Mouse("mouse")
-        print("Starting mouse event loop")
+        logger.log("Starting mouse event loop", LogLevels.INFO)
         mouse.event_loop()
     elif "simulate" == args.dev:
         mouse = Mouse("simulate", args.t)
-        print("Simulating mouse movement")
+        logger.log("Simulating mouse movement", LogLevels.INFO)
