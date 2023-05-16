@@ -1,11 +1,16 @@
 from clients.mouse_client import Mouse
 import argparse
-import cmd2
+import cmd2 #pyright: ignore [reportMissingImports]
+from utils.logger import Logger, LogLevels
+from utils.config import Config
 
+LOGGER = Logger("mouse_emulator")
 
 class MouseEmulator(cmd2.Cmd):
 
-    def __init__(self, t=0.00):
+    config = Config()
+
+    def __init__(self, t=0.01):
         """
     The __init__ function is called when the class is instantiated.
     It sets up the instance of the class, and initializes any variables that need to be set before it can do anything useful.
@@ -16,9 +21,9 @@ class MouseEmulator(cmd2.Cmd):
     :doc-author: Jakub Cermak
     """
         super().__init__()
-        self.intro = cmd2.style(
-            'mouseEmulator is tool for emulation of mouse movement and button press',
-            fg=cmd2.Fg.RED)
+        intro_string = """mouseEmulator is tool for emulation of mouse movement and button press.
+         \nConfig file is set up for: \nOS: {} \nModel: {} """.format(self.config.get_device_os, self.config.get_device_model)
+        self.intro = cmd2.style( intro_string, fg=cmd2.Fg.YELLOW)
         self.prompt = cmd2.style(
             'mouseEmulator>',
             fg=cmd2.Fg.BLUE)
@@ -28,13 +33,14 @@ class MouseEmulator(cmd2.Cmd):
     move_pars = cmd2.Cmd2ArgumentParser(description='Send mouse movement emulation')
     move_pars.add_argument('-x', default=0, type=int,
                            help="Simulator only. Relative x position accepts positive and negative integers. Default "
-                                "is 0")
+                                "is 0") #pyright: ignore [ reportImplicitStringConcatenation]
+
     move_pars.add_argument('-y', default=0, type=int,
                            help="Simulator only. Relative y position accepts positive and negative integers. Default "
-                                "is 0")
+                                "is 0") #pyright: ignore [ reportImplicitStringConcatenation]
 
     @cmd2.with_argparser(move_pars)
-    def do_movement(self, args: argparse.Namespace):
+    def do_move(self, args: argparse.Namespace):
 
         """
     The do_movement function emulates mouse movement by sending a series of
@@ -56,17 +62,17 @@ class MouseEmulator(cmd2.Cmd):
         while rel_x != 0 or rel_y != 0:
 
             if rel_x > 0:
-                rel_x -= 1
-                step_x = 1
+                rel_x -= self.config.step_size
+                step_x = self.config.step_size
             if rel_x < 0:
-                rel_x += 1
-                step_x = 255
+                rel_x += self.config.step_size
+                step_x = 255 - self.config.step_size
             if rel_y > 0:
-                rel_y -= 1
-                step_y = 1
+                rel_y -= self.config.step_size
+                step_y = self.config.step_size
             if rel_y < 0:
-                rel_y += 1
-                step_y = 255
+                rel_y += self.config.step_size
+                step_y = 255 - self.config.step_size
             self.send_mouse_events(step_x, step_y)
 
             step_x = step_y = 0
@@ -84,13 +90,13 @@ class MouseEmulator(cmd2.Cmd):
         try:
             self.mouse.simulate_move(rel_x, rel_y)
         except Exception as e:
-            self.poutput(e)
+            LOGGER.log(e, LogLevels.ERR)
 
     press_pars = cmd2.Cmd2ArgumentParser(description='Send mouse button press event')
 
     press_pars.add_argument('-b', '--button',
                             help="Select button no. to press [0 - for left click, 1 - for left click]. Same for button "
-                                 "release")
+                                 "release") #pyright: ignore [ reportImplicitStringConcatenation]
 
     @cmd2.with_argparser(press_pars)
     def do_btn_press(self, args: argparse.Namespace):
@@ -108,8 +114,7 @@ class MouseEmulator(cmd2.Cmd):
         try:
             self.mouse.simulate_click(int(btn_id))
         except Exception as e:
-            self.poutput(f'type: {type(btn_id)}')
-            self.poutput(f'Error: {e}')
+            LOGGER.log(e, LogLevels.ERR)
 
 
 if __name__ == "__main__":

@@ -5,11 +5,11 @@ import time
 import evdev  # used to get input from the mouse
 from evdev import InputDevice, ecodes
 import argparse
-from utils.logger import Logger, LogLevels
+from utils.logger import Logger, LogLevels 
 
 HID_DBUS = 'org.jc.btkbservice'
 HID_SRVC = '/org/jc/btkbservice'
-logger = Logger("mouse_client")
+LOGGER = Logger("mouse_client")
 
 class Mouse:
 
@@ -24,13 +24,13 @@ class Mouse:
     :param t: float: Set the time between each mouse movement
     :doc-author: Jakub Cermak
     """
-        logger.log("Setting up DBus Client", LogLevels.INFO)
+        LOGGER.log("Setting up DBus Client", LogLevels.INFO)
 
         self.bus = dbus.SystemBus()
         self.bluetoothservice = self.bus.get_object(HID_DBUS, HID_SRVC)
         self.iface = dbus.Interface(self.bluetoothservice, HID_DBUS)
 
-        logger.log("Waiting for mouse", LogLevels.INFO)
+        LOGGER.log("Waiting for mouse", LogLevels.INFO)
 
         # keep trying to find a mouse
         have_dev = False
@@ -45,22 +45,22 @@ class Mouse:
                                for fn in evdev.list_devices()]
                     for device in reversed(devices):
                         if "mouse" in device.name.lower():
-                            logger.log("Found a mouse with the keyword 'mouse'", LogLevels.INFO)
-                            logger.log("device name is " + device.name, LogLevels.INFO)
+                            LOGGER.log("Found a mouse with the keyword 'mouse'", LogLevels.INFO)
+                            LOGGER.log("device name is " + device.name, LogLevels.INFO)
                             self.dev = InputDevice(device.path)
                             have_dev = True
                             break
                 except OSError:
-                    logger.log("Mouse not found, waiting 3 seconds and retrying", LogLevels.ERR)
+                    LOGGER.log("Mouse not found, waiting 3 seconds and retrying", LogLevels.ERR)
                     time.sleep(3)
                 count += 1
 
             if not have_dev:
-                logger.log("Mouse not found after " +
+                LOGGER.log("Mouse not found after " +
                       str(NUMBER_OF_TRIES) + " tries.", LogLevels.INFO)
                 return
             else:
-                logger.log("Mouse Found", LogLevels.INFO)
+                LOGGER.log("Mouse Found", LogLevels.INFO)
         self.t = t
 
     state = [
@@ -132,7 +132,7 @@ class Mouse:
             try:
                 self.send_input()
             except Exception:
-                logger.log("Couldn't send mouse input", LogLevels.ERR)
+                LOGGER.log("Couldn't send mouse input", LogLevels.ERR)
 
     def simulate_move(self, rel_x, rel_y):
 
@@ -157,7 +157,7 @@ class Mouse:
             self.state[3] = 0
             self.state[4] = 0
         except Exception as e:
-            logger.log(e, LogLevels.ERR)
+            LOGGER.log(e, LogLevels.ERR)
 
     def simulate_click(self, button):
         """
@@ -203,23 +203,24 @@ class Mouse:
     :return: The state of the mouse
     :doc-author: Jakub Cermak
     """
+        LOGGER.log(self.state,LogLevels.INFO)
         self.iface.send_mouse(self.state)
 
 
 parser = argparse.ArgumentParser(
     description="Creates mouse client for control device(computer, phone,..) connected over BT over mouse or simulate "
-                "movement")
+                "movement") #pyright: ignore [reportImplicitStringConcatenation]
 parser.add_argument('--dev', default="mouse", type=str, choices=[
     "mouse", "simulate"], help="set if you want to simulate mouse or use real device")
 
 if __name__ == "__main__":
-    logger.log("Setting up mouse Client", LogLevels.INFO)
+    LOGGER.log("Setting up mouse Client", LogLevels.INFO)
 
     args = parser.parse_args()
     if "mouse" == args.dev:
         mouse = Mouse("mouse")
-        logger.log("Starting mouse event loop", LogLevels.INFO)
+        LOGGER.log("Starting mouse event loop", LogLevels.INFO)
         mouse.event_loop()
     elif "simulate" == args.dev:
         mouse = Mouse("simulate", args.t)
-        logger.log("Simulating mouse movement", LogLevels.INFO)
+        LOGGER.log("Simulating mouse movement", LogLevels.INFO)

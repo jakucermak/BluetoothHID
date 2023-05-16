@@ -1,8 +1,4 @@
-#
-#
-#
-#
-#
+
 # Convert value returned from Linux event device ("evdev") to a HID code.
 # This is reverse of what's actually hardcoded in the kernel.
 #
