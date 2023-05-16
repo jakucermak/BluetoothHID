@@ -363,9 +363,6 @@ class BTKbDevice:
     :doc-author: Jakub Cermak
     """
 
-        # logger.logger(msg)
-        print(msg)
-        print(bytes(bytearray(msg)))
         self.cinterrupt.send(bytes(bytearray(msg)))
 
     def reconnect(self, hid_host):
