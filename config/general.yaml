@@ -1,0 +1,7 @@
+# Path to logfiles
+LOGGER:
+  PATH: /var/log/hid/
+
+DEVICE:
+  OS: iOS
+  MODEL: iP14PRO
