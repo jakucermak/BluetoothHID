@@ -8,3 +8,4 @@ venv
 *.pcap
 *.log
 *__init__.py
+*.sublime-*
