@@ -1,11 +1,12 @@
-import dbus
-import dbus.service
-import dbus.mainloop.glib
+import dbus # pyright: ignore [reportMissingImports]
+import dbus.service # pyright: ignore [reportMissingImports]
+import dbus.mainloop.glib # pyright: ignore [reportMissingImports]
 import time
-import evdev  # used to get input from the mouse
-from evdev import InputDevice, ecodes
+import evdev # pyright: ignore [reportMissingImports]
+from evdev import InputDevice, ecodes # pyright: ignore [reportMissingImports]
 import argparse
-from utils.logger import Logger, LogLevels 
+from utils.logger import Logger
+from utils.enums import LogLevels
 
 HID_DBUS = 'org.jc.btkbservice'
 HID_SRVC = '/org/jc/btkbservice'

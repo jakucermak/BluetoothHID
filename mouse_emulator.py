@@ -1,7 +1,9 @@
 from clients.mouse_client import Mouse
 import argparse
-import cmd2 #pyright: ignore [reportMissingImports]
-from utils.logger import Logger, LogLevels
+import cmd2
+from utils import config # pyright: ignore [reportMissingImports]
+from utils.logger import Logger 
+from utils.enums import LogLevels, ConfigEnum as CE
 from utils.config import Config
 
 LOGGER = Logger("mouse_emulator")
@@ -21,8 +23,14 @@ class MouseEmulator(cmd2.Cmd):
     :doc-author: Jakub Cermak
     """
         super().__init__()
-        intro_string = """mouseEmulator is tool for emulation of mouse movement and button press.
+
+        intro_string = """MouseEmulator is tool for emulation of mouse movement and button press.
+        \nConfig file is set up for: {}""".format(CE.DEFAULT)
+        print(self.config.get_device_os)
+        if self.config.get_device_os != CE.DEFAULT:
+            intro_string = """MouseEmulator is tool for emulation of mouse movement and button press.
          \nConfig file is set up for: \nOS: {} \nModel: {} """.format(self.config.get_device_os, self.config.get_device_model)
+
         self.intro = cmd2.style( intro_string, fg=cmd2.Fg.YELLOW)
         self.prompt = cmd2.style(
             'mouseEmulator>',
@@ -33,11 +41,11 @@ class MouseEmulator(cmd2.Cmd):
     move_pars = cmd2.Cmd2ArgumentParser(description='Send mouse movement emulation')
     move_pars.add_argument('-x', default=0, type=int,
                            help="Simulator only. Relative x position accepts positive and negative integers. Default "
-                                "is 0") #pyright: ignore [ reportImplicitStringConcatenation]
+                                "is 0")
 
     move_pars.add_argument('-y', default=0, type=int,
                            help="Simulator only. Relative y position accepts positive and negative integers. Default "
-                                "is 0") #pyright: ignore [ reportImplicitStringConcatenation]
+                                "is 0")   
 
     @cmd2.with_argparser(move_pars)
     def do_move(self, args: argparse.Namespace):
@@ -54,8 +62,8 @@ class MouseEmulator(cmd2.Cmd):
     :return: Nothing
     :doc-author: Jakub Cermak
     """
-        rel_x = args.x
-        rel_y = args.y
+        rel_x = int(args.x * self.config.get_step_coeficient)
+        rel_y = int(args.y * self.config.get_step_coeficient)
 
         step_x = step_y = 0
 
@@ -66,13 +74,13 @@ class MouseEmulator(cmd2.Cmd):
                 step_x = self.config.step_size
             if rel_x < 0:
                 rel_x += self.config.step_size
-                step_x = 255 - self.config.step_size
+                step_x = 256 - self.config.step_size
             if rel_y > 0:
                 rel_y -= self.config.step_size
                 step_y = self.config.step_size
             if rel_y < 0:
                 rel_y += self.config.step_size
-                step_y = 255 - self.config.step_size
+                step_y = 256 - self.config.step_size
             self.send_mouse_events(step_x, step_y)
 
             step_x = step_y = 0
@@ -96,7 +104,7 @@ class MouseEmulator(cmd2.Cmd):
 
     press_pars.add_argument('-b', '--button',
                             help="Select button no. to press [0 - for left click, 1 - for left click]. Same for button "
-                                 "release") #pyright: ignore [ reportImplicitStringConcatenation]
+                                 "release")   
 
     @cmd2.with_argparser(press_pars)
     def do_btn_press(self, args: argparse.Namespace):

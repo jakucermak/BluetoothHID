@@ -1,13 +1,7 @@
 import logging
-from enum import Enum
-from utils import config
 from utils.config import Config
+from utils.enums import LogLevels
 
-class LogLevels(Enum):
-
-    INFO = logging.INFO
-    WARN = logging.WARN
-    ERR = logging.ERROR
 
 class Logger:
 

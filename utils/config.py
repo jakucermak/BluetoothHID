@@ -1,6 +1,6 @@
 import os
 import yaml
-
+from utils.enums import ConfigEnum as CE
 
 class Config:
 
@@ -13,17 +13,26 @@ class Config:
 
 	@property
 	def get_device_os(self):
-		return self.__read_yaml(self.__config_file)['DEVICE']['OS']
+		return self.__read_yaml(self.__config_file)[CE.DEVICE][CE.OS]
 
 	@property
 	def get_device_model(self):
-		return self.__read_yaml(self.__config_file)['DEVICE']['MODEL']
+		return self.__read_yaml(self.__config_file)[CE.DEVICE][CE.MODEL]
 
 	@property
 	def logpath(self):
-		return self.__read_yaml(self.__config_file)['LOGGER']['PATH']
+		return self.__read_yaml(self.__config_file)[CE.LOGGER][CE.PATH]
 
 	@property
 	def step_size(self):
-		device = self.__read_yaml(self.__config_file)['DEVICE']
-		return self.__read_yaml(self.__devices_db)['DEVICE'][device['OS']][device['MODEL']]['MOVE_STEP']
+		device = self.__read_yaml(self.__config_file)[CE.DEVICE]
+		if device[CE.OS] == CE.DEFAULT:
+			return self.__read_yaml(self.__devices_db)[CE.DEVICE][device[CE.OS]][CE.MOVE_STEP]
+		return self.__read_yaml(self.__devices_db)[CE.DEVICE][device[CE.OS]][device[CE.MODEL]][CE.MOVE_STEP]
+
+	@property
+	def get_step_coeficient(self):
+		device = self.__read_yaml(self.__config_file)[CE.DEVICE]
+		if device[CE.OS] == CE.DEFAULT:
+			return self.__read_yaml(self.__devices_db)[CE.DEVICE][device[CE.OS]][CE.MOVE_COEFICIENT]
+		return self.__read_yaml(self.__devices_db)[CE.DEVICE][device[CE.OS]][device[CE.MODEL]][CE.MOVE_COEFICIENT]

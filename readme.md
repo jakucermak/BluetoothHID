@@ -149,3 +149,4 @@ Listening...
 
 - [x] Unify file and service names (as mentioned at the beginning of mouse client and keyboard client)
 - [x] ***INVESTIGATE***: OSError: [Errno 98] Address already in use #1
+- [ ] add catch of wrongly configurated YAML files
