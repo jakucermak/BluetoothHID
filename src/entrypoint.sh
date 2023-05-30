@@ -30,4 +30,4 @@ fi
 #############################
 
 # Run server
-# sudo python3 server.py 
+sudo python3 server.py 
