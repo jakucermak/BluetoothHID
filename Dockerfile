@@ -22,4 +22,4 @@ RUN passwd -d pi
 
 USER pi
 
-# ENTRYPOINT [ "./entrypoint.sh" ]
+# ENTRYPOINT [ "./entrypoint.sh", "/bin/bash" ]

@@ -1,7 +1,7 @@
 #!/bin/bash
 # start services
 sudo service dbus start
-sudo service bluetooth start
+sudo /usr/libexec/bluetooth/bluetoothd -P input &
 
 # wait for startup of services
 msg="Waiting for services to start..."
@@ -14,8 +14,6 @@ while [[ "$(pidof start-stop-daemon)" != "" ]]; do
 done
 echo -e "\r$msg done! (in $time s)"
 
-sudo service bluetooth stop
-sudo /usr/libexec/bluetooth/bluetoothd -P input &
 
 if ! [[ -d "/var/log/hid" ]]; then
     echo "Creating log folder in /var/log/hid"
@@ -30,4 +28,4 @@ fi
 #############################
 
 # Run server
-sudo python3 server.py 
+sudo python3 server.py &
