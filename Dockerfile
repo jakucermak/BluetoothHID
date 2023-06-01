@@ -5,7 +5,8 @@ RUN apt-get update && apt-get install -y \
 								dbus \
 								python3 \
 								pip \
-								python3-dbus
+								python3-dbus \
+								procp
 
 RUN apt-get update && apt-get install -y sudo
 
@@ -22,4 +23,4 @@ RUN passwd -d pi
 
 USER pi
 
-# ENTRYPOINT [ "./entrypoint.sh", "/bin/bash" ]
+ENTRYPOINT [ "./entrypoint.sh" ]
