@@ -17,7 +17,8 @@ from gi.repository import GLib
 from dbus.mainloop.glib import DBusGMainLoop
 
 import xml.etree.ElementTree as ET
-from utils.logger import Logger, LogLevels
+from utils.logger import Logger
+from utils.enums import LogLevels
 
 LOGGER = Logger("server")
 
