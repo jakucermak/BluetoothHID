@@ -1,10 +1,11 @@
 *pycache*/
 .vscode/
 sftp-config.json
-._.DS_Store
 .DS_Store
 .idea
 venv
 *.pcap
 *.log
 *__init__.py
+*.sublime-*
+._*

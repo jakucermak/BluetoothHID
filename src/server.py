@@ -22,7 +22,9 @@ from utils.enums import LogLevels
 
 LOGGER = Logger("server")
 
+
 class HumanInterfaceDeviceProfile(dbus.service.Object):
+
     """
     BlueZ D-Bus Profile for HID
     """
@@ -38,7 +40,8 @@ class HumanInterfaceDeviceProfile(dbus.service.Object):
                          in_signature='oha{sv}', out_signature='')
     def NewConnection(self, path, fd, properties):
         self.fd = fd.take()
-        LOGGER.log('NewConnection({}, {})'.format(path, self.fd), LogLevels.INFO)
+        LOGGER.log('NewConnection({}, {})'.format(
+            path, self.fd), LogLevels.INFO)
         for key in properties.keys():
             if key == 'Version' or key == 'Features':
                 print('  {} = 0x{:04x}'.format(key,
@@ -66,7 +69,7 @@ class BTKbDevice:
     # Service port - must match port configured in SDP record#Interrrupt port
     P_INTR = 19
     # BlueZ dbus
-    # possible error below is path to registered profile 
+    # possible error below is path to registered profile
     PROFILE_DBUS_PATH = '/bluez/jc/btkb_profile'
     ADAPTER_IFACE = 'org.bluez.Adapter1'
     DEVICE_INTERFACE = 'org.bluez.Device1'
@@ -80,7 +83,6 @@ class BTKbDevice:
     # UUID for HID service (1124)
     # https://www.bluetooth.com/specifications/assigned-numbers/service-discovery
     UUID = '00001124-0000-1000-8000-00805f9b34fb'
-    
 
     def __init__(self, hci=0):
         """
@@ -116,7 +118,7 @@ class BTKbDevice:
                                      path_keyword='path')
 
         LOGGER.log('Configuring for name {}'.format(BTKbDevice.MY_DEV_NAME),
-                                                            LogLevels.INFO)
+                   LogLevels.INFO)
         self.config_hid_profile()
 
         # set the Bluetooth device configuration
@@ -267,10 +269,10 @@ class BTKbDevice:
     :doc-author: Jakub Cermak
     """
 
-        self.adapter_property.Set(self.ADAPTER_IFACE, 'Discoverable', new_state)
+        self.adapter_property.Set(
+            self.ADAPTER_IFACE, 'Discoverable', new_state)
 
     def config_hid_profile(self):
-
         """
     The config_hid_profile function is used to configure the Bluez Profile.
     The service record is read from the SDP Service Record file and then options are set for the profile.
@@ -292,18 +294,19 @@ class BTKbDevice:
             'ServiceRecord': service_record,
         }
 
-        manager = dbus.Interface(self.bus.get_object('org.bluez', '/org/bluez'),
-                                 'org.bluez.ProfileManager1')
+        manager = dbus.Interface(self.bus.get_object(
+            'org.bluez', '/org/bluez'),
+            'org.bluez.ProfileManager1')
 
         HumanInterfaceDeviceProfile(self.bus, BTKbDevice.PROFILE_DBUS_PATH)
 
-        manager.RegisterProfile(BTKbDevice.PROFILE_DBUS_PATH, BTKbDevice.UUID, opts)
+        manager.RegisterProfile(
+            BTKbDevice.PROFILE_DBUS_PATH, BTKbDevice.UUID, opts)
 
-        LOGGER.log('Profile registered ', LogLevels.INFO)
+        LOGGER.log('Profile registered', LogLevels.INFO)
 
     @staticmethod
     def read_sdp_service_record():
-
         """
     The read_sdp_service_record function reads the SDP record from a file and returns it as a string.
     The function is called by the __init__ method of BTKbDevice class.
@@ -346,13 +349,14 @@ class BTKbDevice:
         self.sinterrupt.listen(1)
 
         self.ccontrol, cinfo = self.scontrol.accept()
-        LOGGER.log('{} connected on the control socket'.format(cinfo[0]), LogLevels.INFO)
+        LOGGER.log('{} connected on the control socket'.format(
+            cinfo[0]), LogLevels.INFO)
 
         self.cinterrupt, cinfo = self.sinterrupt.accept()
-        LOGGER.log('{} connected on the interrupt channel'.format(cinfo[0]), LogLevels.INFO)
+        LOGGER.log('{} connected on the interrupt channel'.format(
+            cinfo[0]), LogLevels.INFO)
 
     def send(self, msg):
-
         """
     The send function is used to send a message to the C interrupt.
     The function takes in a string and converts it into bytes, then sends it through the serial port.
@@ -390,7 +394,8 @@ class BTKbDevice:
                 self.cinterrupt.connect((hid_host, self.P_INTR))
                 LOGGER.log("Connected!", LogLevels.INFO)
             except Exception as ex:
-                LOGGER.log("didnt connect, will retry..." + str(ex), LogLevels.WARN)
+                LOGGER.log("didnt connect, will retry..."
+                           + str(ex), LogLevels.WARN)
                 time.sleep(1)
 
 

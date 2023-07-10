@@ -1,0 +1,6 @@
+venv
+readme.md
+.git
+.idea
+*.DS_Store*
+*.sublime*
