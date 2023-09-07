@@ -1,7 +1,6 @@
 from clients.mouse_client import Mouse
 import argparse
 import cmd2
-from utils import config # pyright: ignore [reportMissingImports]
 from utils.logger import Logger 
 from utils.enums import LogLevels, ConfigEnum as CE
 from utils.config import Config
