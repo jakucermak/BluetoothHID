@@ -26,7 +26,7 @@ LOGGER = Logger("server")
 class HumanInterfaceDeviceProfile(dbus.service.Object):
 
     """
-    BlueZ D-Bus Profile for HID
+    BlueZ D-Bus Profile for HI
     """
     fd = -1
 

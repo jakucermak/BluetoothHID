@@ -12,11 +12,11 @@ class Config:
             return yaml.safe_load(f)
 
     @property
-    def get_device_os(self):
+    def device_os(self):
         return self.__read_yaml(self.__config_file)['DEVICE']['OS']
 
     @property
-    def get_device_model(self):
+    def device_model(self):
         return self.__read_yaml(self.__config_file)['DEVICE']['MODEL']
 
     @property
