@@ -6,16 +6,16 @@ RUN apt-get update && apt-get install -y \
 								python3 \
 								pip \
 								python3-dbus \
-								procp
-
-RUN apt-get update && apt-get install -y sudo
+								procps \
+								sudo 
 
 WORKDIR /usr/src/hid
 COPY ./src/ ./
+COPY ./entrypoint.sh ./
 
 RUN pip install -r requirements.txt
 
-COPY ./src/pi.conf /etc/dbus-1/system.d/
+# COPY ./src/pi.conf /etc/dbus-1/system.d/
 COPY ./src/config/bluetooth/org.jc.btkbservice.conf /etc/dbus-1/system.d/
 RUN useradd -m pi && adduser pi sudo
 
