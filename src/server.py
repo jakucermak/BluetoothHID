@@ -69,7 +69,6 @@ class BTKbDevice:
     # Service port - must match port configured in SDP record#Interrrupt port
     P_INTR = 19
     # BlueZ dbus
-    # possible error below is path to registered profile
     PROFILE_DBUS_PATH = '/bluez/jc/btkb_profile'
     ADAPTER_IFACE = 'org.bluez.Adapter1'
     DEVICE_INTERFACE = 'org.bluez.Device1'
@@ -86,7 +85,6 @@ class BTKbDevice:
 
     def __init__(self, hci=0):
         """
-    The __init__ function is called when the class is instantiated.
     It sets up the Bluetooth device and configures it for use as a keyboard.
 
 
@@ -160,7 +158,8 @@ class BTKbDevice:
     :doc-author: Jakub Cermak
     """
         LOGGER.log('The client has been disconnect', LogLevels.INFO)
-        self.listen()
+
+        self.reconnect(self.last_dev)
 
     @property
     def address(self):
@@ -355,6 +354,7 @@ class BTKbDevice:
         self.cinterrupt, cinfo = self.sinterrupt.accept()
         LOGGER.log('{} connected on the interrupt channel'.format(
             cinfo[0]), LogLevels.INFO)
+        self.last_dev = cinfo[0]
 
     def send(self, msg):
         """
@@ -381,9 +381,9 @@ class BTKbDevice:
     :doc-author: Jakub Cermak
     """
         LOGGER.log("Trying reconnect...", LogLevels.INFO)
-        while True:
+        reconnect = True
+        while reconnect:
             try:
-                # hidHost = 'XX:XX:XX:XX:XX:XX'
                 self.ccontrol = socket.socket(socket.AF_BLUETOOTH,
                                               socket.SOCK_SEQPACKET,
                                               socket.BTPROTO_L2CAP)
@@ -393,6 +393,7 @@ class BTKbDevice:
                 self.ccontrol.connect((hid_host, self.P_CTRL))
                 self.cinterrupt.connect((hid_host, self.P_INTR))
                 LOGGER.log("Connected!", LogLevels.INFO)
+                reconnect = False
             except Exception as ex:
                 LOGGER.log("didnt connect, will retry..."
                            + str(ex), LogLevels.WARN)
@@ -406,7 +407,7 @@ class BTKbService(dbus.service.Object):
     Send the received HID messages to the Bluetooth HID server to send
     """
 
-    def __init__(self):
+    def __init__(self, bus):
         """
     The __init__ function is called when the class is instantiated.
     It sets up the service and creates a BTKbDevice object to handle all of our bluetooth stuff.
@@ -416,16 +417,32 @@ class BTKbService(dbus.service.Object):
     :doc-author: Jakub Cermak
     """
         LOGGER.log('Setting up service', LogLevels.INFO)
+        self.last_dev = None
 
         bus_name = dbus.service.BusName('org.jc.btkbservice',
                                         bus=dbus.SystemBus())
         dbus.service.Object.__init__(self, bus_name, '/org/jc/btkbservice')
+
+        self.bus = bus
+        self.register_agent()
 
         # create and set up our device
         self.device = BTKbDevice()
 
         # start listening for socket connections
         self.device.listen()
+
+
+    def register_agent(self):
+        """
+        Register this service as an agent for Bluetooth authentication
+        """
+        manager = dbus.Interface(self.bus.get_object('org.bluez', '/org/bluez'),
+                                 'org.bluez.AgentManager1')
+        agent_path = "/org/jc/btkbservice"
+        capability = "NoInputNoOutput"  # This capability means no authentication is required
+        manager.RegisterAgent(agent_path, capability)
+        manager.RequestDefaultAgent(agent_path)  # Set as the default agent
 
     @dbus.service.method('org.jc.btkbservice',
                          in_signature='ay')
@@ -468,6 +485,11 @@ class BTKbService(dbus.service.Object):
                            encoding='utf8',
                            method='xml')
 
+    @dbus.service.method("org.bluez.Agent1", in_signature="ou", out_signature="")
+    def RequestConfirmation(self, device, passkey):
+        LOGGER.log("Auto-accepting authentication request from {}".format(device), LogLevels.INFO)
+        return
+
 
 if __name__ == '__main__':
     # The sockets require root permission
@@ -475,6 +497,7 @@ if __name__ == '__main__':
         sys.exit('Only root can run this script')
 
     DBusGMainLoop(set_as_default=True)
-    myservice = BTKbService()
+    bus = dbus.SystemBus()
+    myservice = BTKbService(bus)
     mainloop = GLib.MainLoop()
     mainloop.run()
