@@ -1,7 +1,7 @@
 from enum import Enum
 import logging
 
-class ConfigEnum(str, Enum):
+class ConfigKey(str, Enum):
 	DEFAULT = "DEFAULT"
 	MOVE_STEP = "MOVE_STEP"
 	MOVE_COEFICIENT = "MOVE_COEFICIENT"

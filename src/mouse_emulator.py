@@ -2,7 +2,7 @@ from clients.mouse_client import Mouse
 import argparse
 import cmd2
 from utils.logger import Logger 
-from utils.enums import LogLevels, ConfigEnum as CE
+from utils.enums import LogLevels, ConfigKey
 from utils.config import Config
 
 LOGGER = Logger("mouse_emulator")
@@ -24,11 +24,11 @@ class MouseEmulator(cmd2.Cmd):
         super().__init__()
 
         intro_string = """MouseEmulator is tool for emulation of mouse movement and button press.
-        \nConfig file is set up for: {}""".format(CE.DEFAULT)
-        print(self.config.get_device_os)
-        if self.config.get_device_os != CE.DEFAULT:
+        \nConfig file is set up for: {}""".format(ConfigKey.DEFAULT)
+        print(self.config.device_os)
+        if self.config.device_os != ConfigKey.DEFAULT:
             intro_string = """MouseEmulator is tool for emulation of mouse movement and button press.
-         \nConfig file is set up for: \nOS: {} \nModel: {} """.format(self.config.get_device_os, self.config.get_device_model)
+         \nConfig file is set up for: \nOS: {} \nModel: {} """.format(self.config.device_os, self.config.device_model)
 
         self.intro = cmd2.style( intro_string, fg=cmd2.Fg.YELLOW)
         self.prompt = cmd2.style(
@@ -61,8 +61,8 @@ class MouseEmulator(cmd2.Cmd):
     :return: Nothing
     :doc-author: Jakub Cermak
     """
-        rel_x = int(args.x * self.config.get_step_coeficient)
-        rel_y = int(args.y * self.config.get_step_coeficient)
+        rel_x = int(args.x * self.config.step_coeficient)
+        rel_y = int(args.y * self.config.step_coeficient)
 
         step_x = step_y = 0
 
