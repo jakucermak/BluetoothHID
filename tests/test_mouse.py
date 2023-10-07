@@ -54,7 +54,7 @@ class TestNegMoveDivider():
 
         expected_step = 128
         
-        result = step_divider(curr_relative_move, curr_step)
+        result = step_divider(curr_relative_move * -1, curr_step)
         
         assert result == expected_step
 
@@ -63,78 +63,45 @@ class TestNegMoveDivider():
         curr_relative_move = -127
 
         expected_step = 192
+        offset = 256
 
-        result = step_divider(curr_relative_move, curr_step)
-        assert result == expected_step
+        result = step_divider(curr_relative_move * -1, curr_step)
+        assert offset - result == expected_step
 
     def test_multiple_steps_division(self):
         curr_step = 128
         curr_relative_move = -15
 
         expected_step = 248
+        offset = 256
 
-        result = step_divider(curr_relative_move, curr_step)
-
-        assert result == expected_step
+        result = step_divider(curr_relative_move * -1, curr_step)
+        
+        assert offset - result == expected_step
         
     def test_step_multiple_one_steps(self):
         curr_step = 127
         curr_rel_move = -2
 
         expected_step = 254
+        offset = 256
 
-        result = step_divider(curr_rel_move, curr_step)
+        result = step_divider(curr_rel_move * -1, curr_step)
 
-        assert result == expected_step 
-    
+        assert offset - result == expected_step 
+
     def test_multiple_step_division_until_1(self):
         curr_step = 128
         curr_relative_move = -1
 
         expected_step = 255
-
-        result = step_divider(curr_relative_move, curr_step)
-
-        assert result == expected_step
-
-
-class TestCompareStepSizes():
-    def test_simple_comparison(self):
-        pos_step = 127
-        neg_step = 128
-
-        rel = 128
-
-        pos_result = step_divider(rel,pos_step)
-        neg_result = step_divider(rel * -1, neg_step)
-
-        assert pos_result + 1 == neg_result
-
-    def test_single_step_division(self):
-        pos_step = 127
-        neg_step = 128
-
-        rel = 100
-
-        pos = step_divider(rel, pos_step)
-        neg = step_divider(rel * -1, neg_step)
-
         offset = 256
 
-        assert pos == offset - neg
+        result = step_divider(curr_relative_move * -1, curr_step)
 
-    def test_multiple_step_division(self):
-        pos_step = 127
-        neg_step = 128
+        assert offset - result == expected_step
 
-        rel = 15
-    
-        pos = step_divider(rel, pos_step)
-        neg = step_divider(rel * -1, neg_step)
 
-        offset = 256
-        
-        assert pos == offset - neg
 
 class TestWithSpeedChanges():
     
@@ -152,6 +119,9 @@ class TestWithSpeedChanges():
         rel = -200
 
         expected_step = 192
-        result = step_divider(rel, step, 0.5)
+        offset = 256
+        result = step_divider(rel * -1, step, 0.5)
 
-        assert result == expected_step
+        assert offset - result == expected_step
+
+

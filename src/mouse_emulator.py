@@ -1,10 +1,9 @@
-from clients.mouse_client import Mouse
 import argparse
 import cmd2
 from utils.logger import Logger 
-from utils.enums import LogLevels, ConfigKey
+from utils.enums import ConfigKey
 from utils.config import Config
-from blehidd import move, btn_press
+from blehidd import move, send_btn_press
 LOGGER = Logger("mouse_emulator")
 
 class MouseEmulator(cmd2.Cmd):
@@ -77,7 +76,7 @@ class MouseEmulator(cmd2.Cmd):
     :param args: argparse.Namespace: Pass the arguments from the command line to the function
     """
         btn_id = args
-        btn_press(btn_id)
+        send_btn_press(btn_id)
 
 if __name__ == "__main__":
     import sys

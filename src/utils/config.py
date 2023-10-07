@@ -25,13 +25,21 @@ class Config:
         return self.__read_yaml(self.__config_file)[ConfigKey.LOGGER][ConfigKey.PATH]
 
     @property
-    def step_size(self):
-        device = self.__read_yaml(self.__config_file)[ConfigKey.DEVICE]
-        return self.__read_yaml(self.__devices_db)[ConfigKey.DEVICE][device[ConfigKey.OS]][device[ConfigKey.MODEL]][ConfigKey.MOVE_STEP]
+    def move_speed(self):
+        try:
+            return self.__read_yaml(self.__devices_db)[ConfigKey.DEVICE][self.device_os][self.device_model][ConfigKey.MOVE_SPEED]
+        except:
+            return 1.0
 
     @property
     def step_coeficient(self):
-        device = self.__read_yaml(self.__config_file)[ConfigKey.DEVICE]
-        if device[ConfigKey.OS] == ConfigKey.DEFAULT:
-            return self.__read_yaml(self.__devices_db)[ConfigKey.DEVICE][device[ConfigKey.OS]][ConfigKey.MOVE_COEFICIENT]
-        return self.__read_yaml(self.__devices_db)[ConfigKey.DEVICE][device[ConfigKey.OS]][device[ConfigKey.MODEL]][ConfigKey.MOVE_COEFICIENT]
+        try:
+            return self.__read_yaml( self.__devices_db)[ConfigKey.DEVICE][self.device_os][ConfigKey.MOVE_COEFICIENT]
+        except yaml.YAMLError as e:
+            return 1.0
+
+                    ###OLD CODE BLOCK###
+    # device = self.__read_yaml(self.__config_file)[ConfigKey.DEVICE]
+    # if device[ConfigKey.OS] == ConfigKey.DEFAULT:
+    #     return self.__read_yaml(self.__devices_db)[ConfigKey.DEVICE][device[ConfigKey.OS]][ConfigKey.MOVE_COEFICIENT]
+    # return self.__read_yaml(self.__devices_db)[ConfigKey.DEVICE][device[ConfigKey.OS]][device[ConfigKey.MODEL]][ConfigKey.MOVE_COEFICIENT]

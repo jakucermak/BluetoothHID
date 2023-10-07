@@ -1,6 +1,6 @@
 from utils.config import Config
 from utils.logger import Logger, LogLevels
-from clients.mouse_client import Mouse
+from connectors.mouse_connector import Mouse
 import math
 
 __CONFIG = Config()
@@ -90,7 +90,7 @@ def send_mouse_movement(rel_x, rel_y):
             LOGGER.log(e, LogLevels.ERR)
 
 
-def btn_press(btn_id):
+def send_btn_press(btn_id):
 
     """
 The do_btn_press function is a function that emulates a mouse click.

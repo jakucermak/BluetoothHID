@@ -3,7 +3,7 @@ import logging
 
 class ConfigKey(str, Enum):
 	DEFAULT = "DEFAULT"
-	MOVE_STEP = "MOVE_STEP"
+	MOVE_SPEED = "MOVE_SPEED"
 	MOVE_COEFICIENT = "MOVE_COEFICIENT"
 	PATH = "PATH"
 	LOGGER = "LOGGER"
