@@ -78,7 +78,7 @@ class BTKbDevice:
     # file path of the sdp record to load
     install_dir = os.path.dirname(os.path.realpath(__file__))
     SDP_RECORD_PATH = os.path.join(install_dir,
-                                   'config/bluetooth/sdp_record.xml')
+                                   '../config/bluetooth/sdp_record.xml')
     # UUID for HID service (1124)
     # https://www.bluetooth.com/specifications/assigned-numbers/service-discovery
     UUID = '00001124-0000-1000-8000-00805f9b34fb'

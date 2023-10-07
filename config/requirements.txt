@@ -1,0 +1,5 @@
+evdev
+cmd2
+pyyaml
+pytest
+pytest-timeout

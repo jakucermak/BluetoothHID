@@ -14,7 +14,7 @@ LOGGER = Logger("mouse_client")
 
 class Mouse:
 
-    def __init__(self, mode: str, t: float = 0):
+    def __init__(self, mode: str = 'sim', t: float = 0):
         """
     The __init__ function is called when the class is instantiated.
     It sets up the DBus connection and waits for a mouse to be connected.
@@ -38,7 +38,7 @@ class Mouse:
         count = 0
         NUMBER_OF_TRIES = 100
 
-        if mode == "mouse":
+        if mode != 'sim':
             while have_dev is False and count < NUMBER_OF_TRIES:
                 try:
                     # try and get a mouse - loop through all devices and try to find a mouse

@@ -4,7 +4,7 @@ import cmd2
 from utils.logger import Logger 
 from utils.enums import LogLevels, ConfigKey
 from utils.config import Config
-
+from blehidd import move, btn_press
 LOGGER = Logger("mouse_emulator")
 
 class MouseEmulator(cmd2.Cmd):
@@ -34,7 +34,6 @@ class MouseEmulator(cmd2.Cmd):
         self.prompt = cmd2.style(
             'mouseEmulator>',
             fg=cmd2.Fg.BLUE)
-        self.mouse = Mouse("simulate", t)
 
     # Argument parser for do_emulate_mouse_movement
     move_pars = cmd2.Cmd2ArgumentParser(description='Send mouse movement emulation')
@@ -58,46 +57,9 @@ class MouseEmulator(cmd2.Cmd):
 
     :param self: Represent the instance of the class
     :param args: argparse.Namespace: Pass the arguments to the function
-    :return: Nothing
-    :doc-author: Jakub Cermak
     """
-        rel_x = int(args.x * self.config.step_coeficient)
-        rel_y = int(args.y * self.config.step_coeficient)
-
-        step_x = step_y = 0
-
-        while rel_x != 0 or rel_y != 0:
-
-            if rel_x > 0:
-                rel_x -= self.config.step_size
-                step_x = self.config.step_size
-            if rel_x < 0:
-                rel_x += self.config.step_size
-                step_x = 256 - self.config.step_size
-            if rel_y > 0:
-                rel_y -= self.config.step_size
-                step_y = self.config.step_size
-            if rel_y < 0:
-                rel_y += self.config.step_size
-                step_y = 256 - self.config.step_size
-            self.send_mouse_events(step_x, step_y)
-
-            step_x = step_y = 0
-
-    def send_mouse_events(self, rel_x, rel_y):
-        """
-    The send_mouse_events function is used to simulate mouse movement.
-
-    :param self: Represent the instance of the class
-    :param rel_x: Move the mouse horizontally
-    :param rel_y: Move the mouse up and down
-    :return: The mouse
-    :doc-author: Jakub Cermak
-    """
-        try:
-            self.mouse.simulate_move(rel_x, rel_y)
-        except Exception as e:
-            LOGGER.log(e, LogLevels.ERR)
+        point = args
+        move(point)
 
     press_pars = cmd2.Cmd2ArgumentParser(description='Send mouse button press event')
 
@@ -113,16 +75,9 @@ class MouseEmulator(cmd2.Cmd):
 
     :param self: Represent the instance of the class
     :param args: argparse.Namespace: Pass the arguments from the command line to the function
-    :return: The exception if there is one
-    :doc-author: Jakub Cermak
     """
-        btn_id = args.button
-
-        try:
-            self.mouse.simulate_click(int(btn_id))
-        except Exception as e:
-            LOGGER.log(e, LogLevels.ERR)
-
+        btn_id = args
+        btn_press(btn_id)
 
 if __name__ == "__main__":
     import sys

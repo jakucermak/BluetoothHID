@@ -1,3 +1,0 @@
-evdev
-cmd2
-pyyaml

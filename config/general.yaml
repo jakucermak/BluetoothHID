@@ -2,10 +2,10 @@
 LOGGER:
   PATH: /var/log/hid/
 
-DEVICE:
-  OS: iOS
-  MODEL: iP13PROMAX
-
 # DEVICE:
-#   OS: DEFAULT
+#   OS: iOS
+#   MODEL: iP13PROMAX
+
+DEVICE:
+  OS: DEFAULT
 
